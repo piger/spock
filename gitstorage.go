@@ -233,8 +233,51 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 	return
 }
 
-func (gs *GitStorage) DeletePage(path string) error {
-	return nil
+func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
+	sig := &git.Signature{
+		Name:  signature.Name,
+		Email: signature.Email,
+		When:  signature.When,
+	}
+
+	idx, err := gs.r.Index()
+	if err != nil {
+		return
+	}
+
+	if err = os.Remove(gs.MakeAbsPath(path)); err != nil {
+		return
+	}
+
+	if err = idx.RemoveByPath(path); err != nil {
+		return
+	}
+	treeId, err = idx.WriteTree()
+	if err != nil {
+		return
+	}
+	// http://stackoverflow.com/questions/16056759/untracked-dirs-on-commit-with-pygit2
+	// We need to also call Write() to avoid leaving "untracked files".
+	if err = idx.Write(); err != nil {
+		return
+	}
+
+	currentBranch, err := gs.r.Head()
+	if err != nil {
+		return
+	}
+	currentTip, err := gs.r.LookupCommit(currentBranch.Target())
+	if err != nil {
+		return
+	}
+
+	tree, err := gs.r.LookupTree(treeId)
+	if err != nil {
+		return
+	}
+	commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+
+	return
 }
 
 type CommitLog struct {

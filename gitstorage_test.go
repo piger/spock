@@ -84,7 +84,7 @@ func TestCommitFile(t *testing.T) {
 
 func TestRenamePage(t *testing.T) {
 	gs := createTestRepo(t)
-	// defer cleanup(t, gs)
+	defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
 	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
@@ -100,7 +100,7 @@ func TestRenamePage(t *testing.T) {
 	_, err = os.Stat(pagePath)
 	checkFatal(t, err)
 
-	logs, err := gs.LogsForPage(newPageName, 0)
+	logs, err := gs.LogsForPage(newPageName)
 	checkFatal(t, err)
 	if len(logs) != 1 {
 		t.Fatalf("There should be 1 log, there are %d", len(logs))
@@ -108,6 +108,25 @@ func TestRenamePage(t *testing.T) {
 	commitLog := logs[0]
 	if commitLog.Message != message {
 		t.Fatalf("Commit message should be \"%s\", is \"%s\"", message+"\n", commitLog.Message)
+	}
+}
+
+func TestDeletePage(t *testing.T) {
+	gs := createTestRepo(t)
+	defer cleanup(t, gs)
+
+	pageName := createIndexPage(t, gs)
+	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
+
+	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
+	checkFatal(t, err)
+
+	_, _, err = gs.DeletePage(pageName, sig, "get rid of index.md")
+	checkFatal(t, err)
+
+	pagePath := filepath.Join(gs.WorkDir, pageName)
+	if _, err := os.Stat(pagePath); err == nil {
+		t.Fatalf("File should have been deleted: %s", pagePath)
 	}
 }
 
