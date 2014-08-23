@@ -239,10 +239,11 @@ func (gs *GitStorage) DeletePage(path string) error {
 
 type CommitLog struct {
 	Message string
+	Name    string
+	Email   string
 }
 
-func (gs *GitStorage) LogsForPage(path string, limit int) (result []CommitLog, err error) {
-	// XXX missing support for limit parameter!
+func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
 	var oidList []git.Oid
 	var commitMap = make(map[git.Oid]*git.Commit)
 
@@ -281,7 +282,13 @@ func (gs *GitStorage) LogsForPage(path string, limit int) (result []CommitLog, e
 
 	for _, oid := range oidList {
 		commit := commitMap[oid]
-		result = append(result, CommitLog{Message: commit.Message()})
+		sig := commit.Author()
+		cl := CommitLog{
+			Message: commit.Message(),
+			Name:    sig.Name,
+			Email:   sig.Email,
+		}
+		result = append(result, cl)
 	}
 
 	return

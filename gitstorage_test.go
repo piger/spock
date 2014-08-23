@@ -127,7 +127,7 @@ func TestLogsForPage(t *testing.T) {
 	_, _, err = gs.CommitFile(pageName, sig2, "modify index.md for fun")
 	checkFatal(t, err)
 
-	logs, err := gs.LogsForPage(pageName, 0)
+	logs, err := gs.LogsForPage(pageName)
 	checkFatal(t, err)
 
 	if len(logs) != 2 {
