@@ -1,9 +1,11 @@
 package spock
 
 import (
-	"github.com/libgit2/git2go"
+	"fmt"
+	"github.com/piger/git2go"
 	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -14,6 +16,12 @@ var GitCommandName string = "git"
 var baseGitIgnore string = `*~
 *.bak
 `
+
+type CommitSignature struct {
+	Name  string
+	Email string
+	When  time.Time
+}
 
 type GitStorage struct {
 	WorkDir string
@@ -114,11 +122,11 @@ func (gs *GitStorage) seedEmptyRepo() error {
 	return nil
 }
 
-func (gs *GitStorage) CommitFile(path, authorName, authorEmail, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
+func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
 	sig := &git.Signature{
-		Name:  authorName,
-		Email: authorEmail,
-		When:  time.Now(),
+		Name:  signature.Name,
+		Email: signature.Email,
+		When:  signature.When,
 	}
 
 	idx, err := gs.r.Index()
@@ -156,9 +164,77 @@ func (gs *GitStorage) CommitFile(path, authorName, authorEmail, message string) 
 	return
 }
 
-func (gs *GitStorage) RenamePage(origPath, destPath string) (string, error) {
+func (gs *GitStorage) UglyRenamePage(origPath, destPath string, signature *CommitSignature, message string) (string, error) {
 	output, err := gs.RunGitCommand("mv", origPath, destPath)
+	if err != nil {
+		log.Print(output)
+		return output, err
+	}
+
+	// XXX we need to set the git committer info, using git config!
+	output, err = gs.RunGitCommand("commit", "-m", message, "--author", fmt.Sprintf("%s <%s>", signature.Name, signature.Email))
+	if err != nil {
+		log.Print(output)
+	}
+
 	return output, err
+}
+
+func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
+	sig := &git.Signature{
+		Name:  signature.Name,
+		Email: signature.Email,
+		When:  signature.When,
+	}
+
+	idx, err := gs.r.Index()
+	if err != nil {
+		return
+	}
+
+	// 1. rename file
+	// 2. add renamed file to index
+	// 3. remove old file from index (from the docs we see "it may exists")
+	// 4. commit
+	if err = os.Rename(gs.MakeAbsPath(origPath), gs.MakeAbsPath(destPath)); err != nil {
+		return
+	}
+
+	if err = idx.AddByPath(destPath); err != nil {
+		return
+	}
+	if err = idx.RemoveByPath(origPath); err != nil {
+		return
+	}
+	treeId, err = idx.WriteTree()
+	if err != nil {
+		return
+	}
+	// http://stackoverflow.com/questions/16056759/untracked-dirs-on-commit-with-pygit2
+	// We need to also call Write() to avoid leaving "untracked files".
+	if err = idx.Write(); err != nil {
+		return
+	}
+
+	currentBranch, err := gs.r.Head()
+	if err != nil {
+		return
+	}
+	currentTip, err := gs.r.LookupCommit(currentBranch.Target())
+	if err != nil {
+		return
+	}
+
+	tree, err := gs.r.LookupTree(treeId)
+	if err != nil {
+		return
+	}
+	commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	return
+}
+
+func (gs *GitStorage) DeletePage(path string) error {
+	return nil
 }
 
 type CommitLog struct {

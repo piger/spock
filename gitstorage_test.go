@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 )
 
 var testPageContent string = `---
@@ -75,27 +76,39 @@ func TestCommitFile(t *testing.T) {
 	defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
+	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
 
-	_, _, err := gs.CommitFile(pageName, "Test User", "test@example.com", "import index.md")
+	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
 }
 
 func TestRenamePage(t *testing.T) {
 	gs := createTestRepo(t)
-	defer cleanup(t, gs)
+	// defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
-	_, _, err := gs.CommitFile(pageName, "Test User", "test@example.com", "import index.md")
+	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
+	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
 
 	newPageName := "foobar.md"
-	output, err := gs.RenamePage(pageName, newPageName)
-	t.Log(output)
+	message := "Renamed index.md to foobar.md"
+	_, _, err = gs.RenamePage(pageName, newPageName, sig, message)
 	checkFatal(t, err)
 
 	pagePath := filepath.Join(gs.WorkDir, newPageName)
 	_, err = os.Stat(pagePath)
 	checkFatal(t, err)
+
+	logs, err := gs.LogsForPage(newPageName, 0)
+	checkFatal(t, err)
+	if len(logs) != 1 {
+		t.Fatalf("There should be 1 log, there are %d", len(logs))
+	}
+	commitLog := logs[0]
+	if commitLog.Message != message {
+		t.Fatalf("Commit message should be \"%s\", is \"%s\"", message+"\n", commitLog.Message)
+	}
 }
 
 func TestLogsForPage(t *testing.T) {
@@ -104,12 +117,14 @@ func TestLogsForPage(t *testing.T) {
 
 	pageName := createIndexPage(t, gs)
 
-	_, _, err := gs.CommitFile(pageName, "Test User", "test@example.com", "import index.md")
+	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
+	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
 
 	pagePath := filepath.Join(gs.WorkDir, pageName)
 	checkFatal(t, ioutil.WriteFile(pagePath, []byte("foo bar baz"), 0644))
-	_, _, err = gs.CommitFile(pageName, "Another Test User", "a_test@example.com", "modify index.md for fun")
+	sig2 := &CommitSignature{Name: "Another Test User", Email: "a_test@example.com", When: time.Now()}
+	_, _, err = gs.CommitFile(pageName, sig2, "modify index.md for fun")
 	checkFatal(t, err)
 
 	logs, err := gs.LogsForPage(pageName, 0)
