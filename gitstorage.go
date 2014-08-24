@@ -14,6 +14,19 @@ var baseGitIgnore string = `*~
 *.bak
 `
 
+// Like "mkdir -p"
+func MkMissingDirs(filename string) error {
+	dirname := filepath.Dir(filename)
+
+	if _, err := os.Stat(dirname); err != nil {
+		if err := os.MkdirAll(dirname, 0755); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type GitStorage struct {
 	WorkDir string
 	r       *git.Repository
@@ -406,10 +419,15 @@ func (gs *GitStorage) GetLastCommit(path string) (*CommitLog, error) {
 func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string) error {
 	fullpath := filepath.Join(gs.WorkDir, page.Path)
 
+	err := MkMissingDirs(fullpath)
+	if err != nil {
+		return err
+	}
+
 	if err := ioutil.WriteFile(fullpath, page.RawBytes, 0644); err != nil {
 		return err
 	}
 
-	_, _, err := gs.CommitFile(page.Path, sig, message)
+	_, _, err = gs.CommitFile(page.Path, sig, message)
 	return err
 }
