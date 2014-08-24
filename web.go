@@ -81,21 +81,21 @@ func newTemplateContext(r *vRequest) map[string]interface{} {
 	tc := make(map[string]interface{})
 
 	if loggedIn, ok := r.Session.Values["logged_in"]; ok {
-		tc["logged_in"] = loggedIn.(bool)
+		tc["session_logged_in"] = loggedIn.(bool)
 	} else {
-		tc["logged_in"] = false
+		tc["session_logged_in"] = false
 	}
 
 	if username, ok := r.Session.Values["name"]; ok {
-		tc["name"] = username.(string)
+		tc["session_name"] = username.(string)
 	} else {
-		tc["name"] = ""
+		tc["session_name"] = ""
 	}
 
 	if email, ok := r.Session.Values["email"]; ok {
-		tc["email"] = email.(string)
+		tc["session_email"] = email.(string)
 	} else {
-		tc["email"] = ""
+		tc["session_email"] = ""
 	}
 
 	return tc
