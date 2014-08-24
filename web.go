@@ -154,6 +154,7 @@ func Logout(w http.ResponseWriter, r *vRequest) {
 func loadTemplates(router *mux.Router) map[string]*template.Template {
 	templates := make(map[string]*template.Template)
 
+	// reverse an URL from inside a template context; needs to access the mux router
 	reverse := func(name string, params ...interface{}) string {
 		strparams := make([]string, len(params))
 		for i, param := range params {

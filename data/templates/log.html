@@ -1,0 +1,26 @@
+{{define "content"}}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      <h2>Log for {{.pageName}}</h2>
+
+      {{range .details}}
+      <div class="media">
+        <a class="pull-left" href="mailto:{{.email}}">
+          <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .email}}?s=32" alt="{{.AuthorEmail}}">
+        </a>
+        <div class="media-body">
+          <h4 class="media-heading">{{.sha}}</h4>
+          <h5>{{.name}} on {{formatDatetime .when "Mon Jan 2 15:04 2006"}}</h5>
+          <pre>{{.message}}</pre>
+        </div>
+      </div><!-- /.media -->
+      {{end}}
+      
+    </div>
+  </div>
+</div>
+
+{{end}}

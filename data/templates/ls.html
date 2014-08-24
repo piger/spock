@@ -1,0 +1,21 @@
+{{define "content"}}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      <h2>All wiki pages</h2>
+
+      {{if .pages}}
+      <ul class="list-unstyled">
+        {{range .pages}}
+          <li><a href="/{{.}}">{{.}}</a></li>
+        {{end}}
+      </ul>
+      {{end}}
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+{{end}}

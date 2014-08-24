@@ -1,0 +1,83 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>spock wiki</title>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootflat.min.css">
+
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
+
+    <link rel="stylesheet" href="/static/css/app.css">
+
+    <link rel="icon" href="/static/favicon.ico">
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">vandine</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-menu">
+          <ul class="nav navbar-nav">
+            <li><a href="?">View</a></li>
+            <li><a href="?edit">Edit</a></li>
+            <li><a href="?log">Log</a></li>
+            <li><a href="?index">Reindex</a></li>
+            <li><a href="/ls">All wiki pages</a></li>
+          </ul>
+
+          <form class="navbar-form navbar-left" role="search" method="post" action="/search">
+            <div class="form-group">
+              <input type="text" name="q" class="form-control" placeholder="Search" {{if .SearchQuery}}value="{{.SearchQuery}}"{{end}}>
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+          </form>
+
+          <ul class="nav navbar-nav navbar-right">
+
+            {{if .session_logged_in}}
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> {{.session_name}} <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="{{reverse "logout"}}">Logout</a></li>
+              </ul>
+            </li>
+            {{else}}
+            <li><a href="{{reverse "login"}}">Login</a></li>
+            {{end}}
+          </ul>
+
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+
+    </nav>
+
+    {{template "content" .}}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    {{template "js" .}}
+
+  </body>
+</html>{{end}}
+
+{{define "js"}}
+{{end}}

@@ -1,0 +1,42 @@
+{{define "content"}}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      {{if .breadcrumbs}}
+      <ol class="breadcrumb">
+        {{range .breadcrumbs}}
+          <li><a href="{{.}}">{{.}}</a></li>
+        {{end}}
+      </ol>
+      {{end}}
+
+      <div id="content">{{.content}}</div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <hr>
+  
+  <div id="footer" class="row">
+    
+
+    <div class="col-md-12">
+      <div class="media">
+        <a class="pull-left" href="mailto:{{.author_email}}">
+          <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .author_email}}?s=64" alt="{{.AuthorEmail}}">
+        </a>
+        <div class="media-body">
+          <h4 class="media-heading">{{.author_name}} on {{formatDatetime .modification_time "Mon Jan 2 15:04 2006"}}</h4>
+          <pre>{{.last_commit}}</pre>
+        </div>
+      </div><!-- /.media -->
+
+      <p><small>generated in {{.render_time}}</small></p>
+    </div><!-- /.col -->
+
+  </div><!-- /.footer -->
+</div><!-- /.container -->
+
+{{end}}

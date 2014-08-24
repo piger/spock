@@ -1,0 +1,68 @@
+{{define "content"}}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      {{if .isNew}}
+      <h2>Create page {{.pageName}}</h2>
+      {{else}}
+      <h2>Edit page {{.pageName}}</h2>
+      {{end}}
+
+      <form id="editor-form" name="editor" action="" method="post">
+        <div class="editor-wrapper">
+          <div id="editor">{{.content}}</div>
+          <div id="editor-statusbar">{{.pageName}} <span id="status-text">*</span></div>
+          <textarea id="content-area" name="content"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="commit-message">Comment</label>
+          <textarea class="form-control" id="commit-message" name="comment" rows="2" placeholder="Write an optional comment">{{.comment}}</textarea>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" id="save-btn" name="save" class="btn btn-primary">Save</button>
+          <button type="button" id="cancel-btn" class="btn btn-default">Cancel</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div><!-- /container -->
+{{end}}
+
+{{define "js"}}
+<script>
+ $(document).ready(function() {
+   $("#cancel-btn").on('click', function () {
+     var u = window.location.href;
+     window.location.href = u.replace("?edit", "");
+   });
+ });
+</script>
+
+<script src="/static/ace-1.1.5-min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="/static/ace-1.1.5-min/ext-statusbar.js"></script>
+<script>
+ $(document).ready(function() {
+   var editor = ace.edit("editor");
+   var StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+   var statusBar = new StatusBar(editor, document.getElementById("editor-statusbar"));
+
+   editor.setTheme("ace/theme/tomorrow");
+   editor.getSession().setMode("ace/mode/markdown");
+
+   
+   $("#editor-form").submit(function(event) {
+     var session = editor.getSession();
+     var doc = session.getDocument();
+     
+     $("#content-area").val(doc.getValue());
+   });
+ });
+
+</script>
+{{end}}

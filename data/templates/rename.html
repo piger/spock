@@ -1,0 +1,29 @@
+{{define "content"}}
+
+<div class="container">
+  
+  <div class="row">
+    <div class="col-md-12">
+      <h2>Rename page</h2>
+
+      <form action="" method="post" role="form">
+
+        <div class="form-group">
+          <input type="text" class="form-control" name="new-name" id="new-name" placeholder="new name">
+        </div>
+
+        <div class="form-group">
+          <textarea id="comment" class="form-control" name="comment" placeholder="optional comment"></textarea>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" id="save-btn" name="save" class="btn btn-primary">Save</button>
+          <button type="button" id="cancel-btn" class="btn btn-default">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+{{end}}

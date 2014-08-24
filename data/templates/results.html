@@ -1,0 +1,25 @@
+{{define "content"}}
+
+<div class="container">
+  
+  <div class="row">
+    
+    <div class="col-md-12">
+
+      <h2>Results</h2>
+
+      {{if .Suggestion}}
+      <p>Did you mean: <a href="/search?q={{urlquery .Suggestion}}">{{.Suggestion}}</a>?</p>
+      {{end}}
+
+      {{range .results}}
+        <p>Title: <a href="/{{.Title}}">{{.Title}}</a></p>
+        <pre>{{.Highlight}}</pre>
+      {{end}}
+        
+    </div><!-- /.col -->
+    
+  </div><!-- /.row -->
+  
+</div><!-- /.container -->
+{{end}}
