@@ -85,20 +85,74 @@ func Index(w http.ResponseWriter, r *vRequest) {
 }
 
 func Login(w http.ResponseWriter, r *vRequest) {
+	var error bool
+
+	if r.Session.Values["logged_in"] == true {
+		http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
+		return
+	}
+
+	if r.Request.Method == "POST" {
+		if err := r.Request.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		name := r.Request.PostFormValue("name")
+		email := r.Request.PostFormValue("email")
+
+		if name != "" && email != "" {
+			r.Session.Values["logged_in"] = true
+			r.Session.Values["name"] = name
+			r.Session.Values["email"] = email
+			r.Session.Save(r.Request, w)
+			http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
+			return
+		} else {
+			error = true
+		}
+	}
+
 	context := make(map[string]interface{})
+	context["error"] = error
+
 	r.Ctx.RenderTemplate("login.html", context, w)
 }
 
-func LoginPOST(w http.ResponseWriter, r *vRequest) {
-	http.Redirect(w, r.Request, "/login", 302)
+func Logout(w http.ResponseWriter, r *vRequest) {
+	delete(r.Session.Values, "logged_in")
+	delete(r.Session.Values, "name")
+	delete(r.Session.Values, "email")
+	r.Session.Save(r.Request, w)
+
+	http.Redirect(w, r.Request, "/login", http.StatusSeeOther)
 }
 
-func loadTemplates() map[string]*template.Template {
+func loadTemplates(router *mux.Router) map[string]*template.Template {
 	templates := make(map[string]*template.Template)
+
+	reverse := func(name string, params ...interface{}) string {
+		strparams := make([]string, len(params))
+		for i, param := range params {
+			strparams[i] = fmt.Sprint(param)
+		}
+
+		route := router.GetRoute(name)
+		if route == nil {
+			log.Fatalf("Route %s does not exists", name)
+		}
+		url, err := route.URL(strparams...)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return url.Path
+	}
 
 	funcMap := template.FuncMap{
 		"formatDatetime": formatDatetime,
 		"gravatarHash":   gravatarHash,
+		"reverse":        reverse,
 	}
 
 	templateNames := []string{
@@ -119,20 +173,21 @@ func loadTemplates() map[string]*template.Template {
 }
 
 func RunServer(address string, storage Storage) error {
+	r := mux.NewRouter()
+
 	ac := &AppContext{
 		SessionStore: sessions.NewCookieStore([]byte("lalala")),
 		Storage:      &storage,
-		Templates:    loadTemplates(),
+		Templates:    loadTemplates(r),
 	}
 
 	http.Handle(staticPrefix,
 		http.StripPrefix(staticPrefix,
 			http.FileServer(http.Dir(staticDir))))
 
-	r := mux.NewRouter()
 	r.Handle("/", WithRequest(ac, vHandlerFunc(Index))).Name("index")
-	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login").Methods("GET")
-	r.Handle("/login", WithRequest(ac, vHandlerFunc(LoginPOST))).Name("login").Methods("POST")
+	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
+	r.Handle("/logout", WithRequest(ac, vHandlerFunc(Logout))).Name("logout")
 	http.Handle("/", r)
 
 	log.Printf("Listening on %s\n", address)
