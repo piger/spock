@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+const (
+	ANONYMOUS_NAME  = "Anonymous"
+	ANONYMOUS_EMAIL = "anon@wiki.int"
+)
+
 func getPagePath(r *vRequest) string {
 	vars := mux.Vars(r.Request)
 	return vars["pagepath"]
@@ -97,13 +102,13 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 func LookupAuthor(r *vRequest) (fullname, email string) {
 	if ifullname, ok := r.Session.Values["name"]; !ok {
-		fullname = "Anonymous"
+		fullname = ANONYMOUS_NAME
 	} else {
 		fullname = ifullname.(string)
 	}
 
 	if iemail, ok := r.Session.Values["email"]; !ok {
-		email = "anonymous@wiki.int"
+		email = ANONYMOUS_EMAIL
 	} else {
 		email = iemail.(string)
 	}
