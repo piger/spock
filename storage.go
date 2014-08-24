@@ -2,6 +2,7 @@ package spock
 
 import (
 	"github.com/piger/git2go"
+	"time"
 )
 
 var PAGE_EXTENSIONS = []string{"md", "rst", "txt"}
@@ -13,4 +14,11 @@ type Storage interface {
 	LogsForPage(path string) ([]CommitLog, error)
 	LookupPage(pagepath string) (*Page, error)
 	GetLastCommit(path string) (*CommitLog, error)
+}
+
+type CommitLog struct {
+	Message string
+	Name    string
+	Email   string
+	When    time.Time
 }

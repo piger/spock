@@ -245,13 +245,6 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 	return
 }
 
-type CommitLog struct {
-	Message string
-	Name    string
-	Email   string
-	When    time.Time
-}
-
 func extractCommitLog(commit *git.Commit) *CommitLog {
 	author := commit.Author()
 	return &CommitLog{Message: commit.Message(), Name: author.Name, Email: author.Email, When: author.When}
