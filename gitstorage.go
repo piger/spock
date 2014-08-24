@@ -14,12 +14,6 @@ var baseGitIgnore string = `*~
 *.bak
 `
 
-type CommitSignature struct {
-	Name  string
-	Email string
-	When  time.Time
-}
-
 type GitStorage struct {
 	WorkDir string
 	r       *git.Repository
@@ -406,4 +400,15 @@ func (gs *GitStorage) GetLastCommit(path string) (*CommitLog, error) {
 	}
 
 	return extractCommitLog(cc), nil
+}
+
+func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string) error {
+	fullpath := filepath.Join(gs.WorkDir, page.Path)
+
+	if err := ioutil.WriteFile(fullpath, page.RawBytes, 0644); err != nil {
+		return err
+	}
+
+	_, _, err := gs.CommitFile(page.Path, sig, message)
+	return err
 }

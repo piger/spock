@@ -14,6 +14,7 @@ type Storage interface {
 	LogsForPage(path string) ([]CommitLog, error)
 	LookupPage(pagepath string) (*Page, error)
 	GetLastCommit(path string) (*CommitLog, error)
+	SavePage(page *Page, sig *CommitSignature, message string) error
 }
 
 type CommitLog struct {
@@ -21,4 +22,10 @@ type CommitLog struct {
 	Name    string
 	Email   string
 	When    time.Time
+}
+
+type CommitSignature struct {
+	Name  string
+	Email string
+	When  time.Time
 }

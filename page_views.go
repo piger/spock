@@ -48,3 +48,65 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 
 	r.Ctx.RenderTemplate("page.html", ctx, w)
 }
+
+func EditPage(w http.ResponseWriter, r *vRequest) {
+	pagepath := getPagePath(r)
+	page, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if page == nil && err == nil {
+		http.NotFound(w, r.Request)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if r.Request.Method == "POST" {
+		if err := r.Request.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		content := r.Request.PostFormValue("content")
+		comment := r.Request.PostFormValue("comment")
+		fullname, email := LookupAuthor(r)
+
+		page.RawBytes = []byte(content)
+		sig := &CommitSignature{
+			Name:  fullname,
+			Email: email,
+			When:  time.Now(),
+		}
+		err := (*r.Ctx.Storage).SavePage(page, sig, comment)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r.Request, page.ShortName(), http.StatusSeeOther)
+		return
+	}
+
+	ctx := newTemplateContext(r)
+	ctx["content"] = template.HTML(page.RawBytes)
+	ctx["pageName"] = page.Path
+	ctx["isNew"] = false
+	ctx["comment"] = ""
+
+	r.Ctx.RenderTemplate("edit_page.html", ctx, w)
+}
+
+func LookupAuthor(r *vRequest) (fullname, email string) {
+	if ifullname, ok := r.Session.Values["name"]; !ok {
+		fullname = "Anonymous"
+	} else {
+		fullname = ifullname.(string)
+	}
+
+	if iemail, ok := r.Session.Values["email"]; !ok {
+		email = "anonymous@wiki.int"
+	} else {
+		email = iemail.(string)
+	}
+
+	return
+}

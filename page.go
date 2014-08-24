@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -62,6 +63,16 @@ func LoadPage(path, relpath string) (*Page, error) {
 	}
 
 	return page, nil
+}
+
+func (page *Page) ShortName() string {
+	ext := filepath.Ext(page.Path)
+	if len(ext) > 0 {
+		l := len(page.Path) - len(ext)
+		return page.Path[0:l]
+	} else {
+		return page.Path
+	}
 }
 
 func (page *Page) Render() ([]byte, error) {
