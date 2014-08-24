@@ -1,7 +1,6 @@
 package spock
 
 import (
-	"fmt"
 	"github.com/piger/git2go"
 	"io/ioutil"
 	"log"
@@ -162,22 +161,6 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 	}
 	commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
 	return
-}
-
-func (gs *GitStorage) UglyRenamePage(origPath, destPath string, signature *CommitSignature, message string) (string, error) {
-	output, err := gs.RunGitCommand("mv", origPath, destPath)
-	if err != nil {
-		log.Print(output)
-		return output, err
-	}
-
-	// XXX we need to set the git committer info, using git config!
-	output, err = gs.RunGitCommand("commit", "-m", message, "--author", fmt.Sprintf("%s <%s>", signature.Name, signature.Email))
-	if err != nil {
-		log.Print(output)
-	}
-
-	return output, err
 }
 
 func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
