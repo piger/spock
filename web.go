@@ -77,6 +77,32 @@ func (ac *AppContext) RenderTemplate(name string, context map[string]interface{}
 	buf.WriteTo(w)
 }
 
+func newTemplateContext(r *vRequest) map[string]interface{} {
+	tc := make(map[string]interface{})
+
+	if loggedIn, ok := r.Session.Values["logged_in"]; ok {
+		tc["logged_in"] = loggedIn.(bool)
+	} else {
+		tc["logged_in"] = false
+	}
+
+	if username, ok := r.Session.Values["name"]; ok {
+		tc["name"] = username.(string)
+	} else {
+		tc["name"] = ""
+	}
+
+	if email, ok := r.Session.Values["email"]; ok {
+		tc["email"] = email.(string)
+	} else {
+		tc["email"] = ""
+	}
+
+	return tc
+}
+
+// views
+
 func Index(w http.ResponseWriter, r *vRequest) {
 	context := make(map[string]interface{})
 	context["foo"] = "bar"
@@ -113,10 +139,10 @@ func Login(w http.ResponseWriter, r *vRequest) {
 		}
 	}
 
-	context := make(map[string]interface{})
-	context["error"] = error
+	ctx := newTemplateContext(r)
+	ctx["error"] = error
 
-	r.Ctx.RenderTemplate("login.html", context, w)
+	r.Ctx.RenderTemplate("login.html", ctx, w)
 }
 
 func Logout(w http.ResponseWriter, r *vRequest) {
