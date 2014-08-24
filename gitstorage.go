@@ -26,6 +26,11 @@ type GitStorage struct {
 }
 
 func NewGitStorage(path string) (*GitStorage, error) {
+	gitstorage := &GitStorage{WorkDir: path}
+	return gitstorage, nil
+}
+
+func OpenGitStorage(path string) (*GitStorage, error) {
 	repo, err := git.OpenRepository(path)
 	if err != nil {
 		return nil, err

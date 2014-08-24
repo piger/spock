@@ -14,7 +14,7 @@ var (
 func main() {
 	flag.Parse()
 
-	storage, err := spock.NewGitStorage(*repo)
+	storage, err := spock.OpenGitStorage(*repo)
 	if err != nil {
 		panic(err)
 	}
