@@ -214,9 +214,10 @@ func RunServer(address string, storage Storage) error {
 	r.Handle("/", WithRequest(ac, vHandlerFunc(Index))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
 	r.Handle("/logout", WithRequest(ac, vHandlerFunc(Logout))).Name("logout")
+	r.Handle("/{pagepath:[a-zA-Z0-9/]+}", WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
 	http.Handle("/", r)
 
-	log.Printf("Listening on %s\n", address)
+	log.Printf("Listening on: %s\n", address)
 	err := http.ListenAndServe(address, nil)
 	return err
 }

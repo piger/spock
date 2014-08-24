@@ -1,6 +1,7 @@
 package spock
 
 import (
+	"errors"
 	"github.com/piger/git2go"
 	"io/ioutil"
 	"log"
@@ -25,7 +26,11 @@ type GitStorage struct {
 }
 
 func NewGitStorage(path string) (*GitStorage, error) {
-	gitstorage := &GitStorage{WorkDir: path}
+	repo, err := git.OpenRepository(path)
+	if err != nil {
+		return nil, err
+	}
+	gitstorage := &GitStorage{WorkDir: path, r: repo}
 	return gitstorage, nil
 }
 
@@ -239,6 +244,12 @@ type CommitLog struct {
 	Message string
 	Name    string
 	Email   string
+	When    time.Time
+}
+
+func extractCommitLog(commit *git.Commit) *CommitLog {
+	author := commit.Author()
+	return &CommitLog{Message: commit.Message(), Name: author.Name, Email: author.Email, When: author.When}
 }
 
 func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
@@ -290,4 +301,111 @@ func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
 	}
 
 	return
+}
+
+func (gs *GitStorage) LookupPage(pagepath string) (*Page, error) {
+	absbasepath := filepath.Join(gs.WorkDir, pagepath)
+	if absbasepath[0:len(gs.WorkDir)] != gs.WorkDir {
+		return nil, errors.New("Page path outside of repository directory: " + absbasepath)
+	}
+
+	var found bool
+	var pageext string
+	for _, ext := range PAGE_EXTENSIONS {
+		if _, err := os.Stat(absbasepath + "." + ext); err == nil {
+			found = true
+			pageext = ext
+		}
+	}
+
+	if !found {
+		return nil, nil
+	}
+
+	page, err := LoadPage(absbasepath+"."+pageext, pagepath+"."+pageext)
+	if err != nil {
+		return nil, err
+	}
+
+	return page, nil
+}
+
+type OidSet struct {
+	set map[*git.Oid]bool
+}
+
+func NewOidSet() *OidSet {
+	return &OidSet{set: make(map[*git.Oid]bool)}
+}
+
+func (o *OidSet) Add(oid *git.Oid) bool {
+	_, found := o.set[oid]
+	o.set[oid] = true
+	return !found
+}
+
+func (gs *GitStorage) GetLastCommit(path string) (*CommitLog, error) {
+	head, err := gs.r.Head()
+	if err != nil {
+		return nil, err
+	}
+	commit, err := gs.r.LookupCommit(head.Target())
+	if err != nil {
+		return nil, err
+	}
+	tree, err := commit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	blob, err := tree.EntryByPath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	visited := NewOidSet()
+	var queue []*git.Commit
+	var cc *git.Commit
+
+	visited.Add(blob.Id)
+	stop := false
+	queue = append(queue, commit)
+
+	for {
+		if len(queue) == 0 {
+			break
+		}
+		cc = queue[0]
+		queue = queue[1:]
+
+		var i uint
+		for i = 0; i < cc.ParentCount(); i++ {
+			parent := cc.Parent(i)
+			if parent == nil {
+				log.Fatal("parent = nil")
+			}
+			ptree, err := parent.Tree()
+			if err != nil {
+				return nil, err
+			}
+			pblob, err := ptree.EntryByPath(path)
+			if err != nil {
+				continue
+			}
+
+			if !blob.Id.Equal(pblob.Id) {
+				stop = true
+			} else {
+				if rv := visited.Add(parent.TreeId()); rv {
+					queue = append(queue, parent)
+				}
+			}
+		}
+
+		if stop {
+			break
+		}
+	}
+
+	return extractCommitLog(cc), nil
 }
