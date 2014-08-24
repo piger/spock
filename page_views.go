@@ -23,12 +23,12 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 	renderStart := time.Now()
 
 	pagepath := getPagePath(r)
-	page, err := (*r.Ctx.Storage).LookupPage(pagepath)
-	if page == nil && err == nil {
-		http.NotFound(w, r.Request)
-		return
-	} else if err != nil {
+	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !exists {
+		http.NotFound(w, r.Request)
 		return
 	}
 
@@ -56,14 +56,15 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 
 func EditPage(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, err := (*r.Ctx.Storage).LookupPage(pagepath)
-	if page == nil && err == nil {
-		http.NotFound(w, r.Request)
-		return
-	} else if err != nil {
+	page, _, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// else if !exists {
+	//		http.NotFound(w, r.Request)
+	//		return
+	//	}
 
 	if r.Request.Method == "POST" {
 		if err := r.Request.ParseForm(); err != nil {
@@ -87,7 +88,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			return
 		}
 
-		http.Redirect(w, r.Request, page.ShortName(), http.StatusSeeOther)
+		http.Redirect(w, r.Request, "/"+page.ShortName(), http.StatusSeeOther)
 		return
 	}
 
@@ -118,12 +119,12 @@ func LookupAuthor(r *vRequest) (fullname, email string) {
 
 func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, err := (*r.Ctx.Storage).LookupPage(pagepath)
-	if page == nil && err == nil {
-		http.NotFound(w, r.Request)
-		return
-	} else if err != nil {
+	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !exists {
+		http.NotFound(w, r.Request)
 		return
 	}
 

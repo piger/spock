@@ -12,7 +12,7 @@ type Storage interface {
 	RenamePage(origPath, destPath string, signature *CommitSignature, message string) (*git.Oid, *git.Oid, error)
 	DeletePage(path string, signature *CommitSignature, message string) (*git.Oid, *git.Oid, error)
 	LogsForPage(path string) ([]CommitLog, error)
-	LookupPage(pagepath string) (*Page, error)
+	LookupPage(pagepath string) (*Page, bool, error)
 	GetLastCommit(path string) (*CommitLog, error)
 	SavePage(page *Page, sig *CommitSignature, message string) error
 }

@@ -309,31 +309,39 @@ func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
 	return
 }
 
-func (gs *GitStorage) LookupPage(pagepath string) (*Page, error) {
+func (gs *GitStorage) LookupPage(pagepath string) (*Page, bool, error) {
 	absbasepath := filepath.Join(gs.WorkDir, pagepath)
 	if absbasepath[0:len(gs.WorkDir)] != gs.WorkDir {
-		return nil, errors.New("Page path outside of repository directory: " + absbasepath)
+		return nil, false, errors.New("Page path outside of repository directory: " + absbasepath)
 	}
 
 	var found bool
-	var pageext string
-	for _, ext := range PAGE_EXTENSIONS {
-		if _, err := os.Stat(absbasepath + "." + ext); err == nil {
+	if len(filepath.Ext(pagepath)) > 0 {
+		if _, err := os.Stat(absbasepath); err == nil {
 			found = true
-			pageext = ext
+		}
+	} else {
+		for _, ext := range PAGE_EXTENSIONS {
+			if _, err := os.Stat(absbasepath + "." + ext); err == nil {
+				found = true
+				absbasepath = absbasepath + "." + ext
+				pagepath = pagepath + "." + ext
+				break
+			}
 		}
 	}
 
 	if !found {
-		return nil, nil
+		// append the default extension
+		return &Page{Path: pagepath + ".md"}, false, nil
 	}
 
-	page, err := LoadPage(absbasepath+"."+pageext, pagepath+"."+pageext)
+	page, err := LoadPage(absbasepath, pagepath)
 	if err != nil {
-		return nil, err
+		return nil, found, err
 	}
 
-	return page, nil
+	return page, found, nil
 }
 
 type OidSet struct {
