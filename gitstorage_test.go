@@ -56,16 +56,6 @@ func createIndexPage(t *testing.T, gs *GitStorage) string {
 	return pageName
 }
 
-func TestNewGitStorage(t *testing.T) {
-	gs, err := NewGitStorage("/tmp/foo")
-	checkFatal(t, err)
-	exGitDir := filepath.Join("/tmp/foo", ".git")
-
-	if gs.GitDir != exGitDir {
-		t.Fatalf("GitDir should be %s, is %s", exGitDir, gs.GitDir)
-	}
-}
-
 func TestInitRepository(t *testing.T) {
 	gs := createTestRepo(t)
 	defer cleanup(t, gs)
