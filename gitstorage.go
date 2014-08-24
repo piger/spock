@@ -241,7 +241,13 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 
 func extractCommitLog(commit *git.Commit) *CommitLog {
 	author := commit.Author()
-	return &CommitLog{Message: commit.Message(), Name: author.Name, Email: author.Email, When: author.When}
+	return &CommitLog{
+		Message: commit.Message(),
+		Name:    author.Name,
+		Email:   author.Email,
+		When:    author.When,
+		Id:      commit.Id().String(),
+	}
 }
 
 func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
@@ -283,13 +289,8 @@ func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
 
 	for _, oid := range oidList {
 		commit := commitMap[oid]
-		sig := commit.Author()
-		cl := CommitLog{
-			Message: commit.Message(),
-			Name:    sig.Name,
-			Email:   sig.Email,
-		}
-		result = append(result, cl)
+		cl := extractCommitLog(commit)
+		result = append(result, *cl)
 	}
 
 	return

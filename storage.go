@@ -18,6 +18,7 @@ type Storage interface {
 }
 
 type CommitLog struct {
+	Id      string
 	Message string
 	Name    string
 	Email   string

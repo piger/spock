@@ -88,7 +88,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	ctx["content"] = template.HTML(page.RawBytes)
-	ctx["pageName"] = page.Path
+	ctx["pageName"] = page.ShortName()
 	ctx["isNew"] = false
 	ctx["comment"] = ""
 
@@ -109,4 +109,38 @@ func LookupAuthor(r *vRequest) (fullname, email string) {
 	}
 
 	return
+}
+
+func ShowPageLog(w http.ResponseWriter, r *vRequest) {
+	pagepath := getPagePath(r)
+	page, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if page == nil && err == nil {
+		http.NotFound(w, r.Request)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	commits, err := (*r.Ctx.Storage).LogsForPage(page.Path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ctx := newTemplateContext(r)
+	ctx["pageName"] = page.ShortName()
+	var details []map[string]interface{}
+
+	for _, commitlog := range commits {
+		info := make(map[string]interface{})
+		info["sha"] = commitlog.Id
+		info["message"] = commitlog.Message
+		info["name"] = commitlog.Name
+		info["email"] = commitlog.Email
+		info["when"] = commitlog.When
+		details = append(details, info)
+	}
+	ctx["details"] = details
+	r.Ctx.RenderTemplate("log.html", ctx, w)
 }
