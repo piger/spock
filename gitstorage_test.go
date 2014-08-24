@@ -56,6 +56,17 @@ func createIndexPage(t *testing.T, gs *GitStorage) string {
 	return pageName
 }
 
+func createSignature(t *testing.T) *CommitSignature {
+	loc, err := time.LoadLocation("Europe/Rome")
+	checkFatal(t, err)
+	sig := &CommitSignature{
+		Name:  "Palle Nyborg",
+		Email: "palle@superfoppa.com",
+		When:  time.Date(2014, 8, 24, 22, 12, 0, 0, loc),
+	}
+	return sig
+}
+
 func TestInitRepository(t *testing.T) {
 	gs := createTestRepo(t)
 	defer cleanup(t, gs)
@@ -66,9 +77,7 @@ func TestCommitFile(t *testing.T) {
 	defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
-	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
-
-	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
+	_, _, err := gs.CommitFile(pageName, createSignature(t), "import index.md")
 	checkFatal(t, err)
 }
 
@@ -77,7 +86,7 @@ func TestRenamePage(t *testing.T) {
 	defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
-	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
+	sig := createSignature(t)
 	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
 
@@ -90,6 +99,8 @@ func TestRenamePage(t *testing.T) {
 	_, err = os.Stat(pagePath)
 	checkFatal(t, err)
 
+	// here we will get just 1 log insted of 2 (which would be correct), because
+	// our LogsForPage doesn't detect renamed files.
 	logs, err := gs.LogsForPage(newPageName)
 	checkFatal(t, err)
 	if len(logs) != 1 {
@@ -106,7 +117,7 @@ func TestDeletePage(t *testing.T) {
 	defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
-	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
+	sig := createSignature(t)
 
 	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
@@ -126,31 +137,36 @@ func TestLogsForPage(t *testing.T) {
 
 	pageName := createIndexPage(t, gs)
 
-	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
-	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
+	sig := createSignature(t)
+	messages := []string{
+		"import index.md",
+		"modify index.md for fun",
+	}
+	_, _, err := gs.CommitFile(pageName, sig, messages[0])
 	checkFatal(t, err)
 
 	pagePath := filepath.Join(gs.WorkDir, pageName)
 	checkFatal(t, ioutil.WriteFile(pagePath, []byte("foo bar baz"), 0644))
 	sig2 := &CommitSignature{Name: "Another Test User", Email: "a_test@example.com", When: time.Now()}
-	_, _, err = gs.CommitFile(pageName, sig2, "modify index.md for fun")
+	_, _, err = gs.CommitFile(pageName, sig2, messages[1])
 	checkFatal(t, err)
 
 	logs, err := gs.LogsForPage(pageName)
 	checkFatal(t, err)
 
 	if len(logs) != 2 {
-		t.Fatalf("should return 2 logs but returned %d", len(logs))
+		t.Fatalf("should return %d logs but returned %d", len(messages), len(logs))
 	}
 
-	exMessages := []string{
-		"modify index.md for fun",
-		"import index.md",
+	// reverse the messages array, as we are getting commit messages in
+	// descending order
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
 	}
 
 	for i, commitLog := range logs {
-		if commitLog.Message != exMessages[i] {
-			t.Fatalf("Message should be \"%s\", is \"%s\"", exMessages[i], commitLog.Message)
+		if commitLog.Message != messages[i] {
+			t.Fatalf("Message should be \"%s\", is \"%s\"", messages[i], commitLog.Message)
 		}
 	}
 }
@@ -166,7 +182,7 @@ func TestGetLastCommit(t *testing.T) {
 	_, _, err := gs.CommitFile(pageName, sig, msg)
 	checkFatal(t, err)
 
-	lastcommit, err := gs.GetLastCommit("index.md")
+	lastcommit, err := gs.GetLastCommit(pageName)
 	checkFatal(t, err)
 	if lastcommit.Message != msg {
 		t.Fatalf("Commit message should be \"%s\", is \"%s\"", msg, lastcommit.Message)
