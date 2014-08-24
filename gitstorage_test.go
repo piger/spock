@@ -154,3 +154,21 @@ func TestLogsForPage(t *testing.T) {
 		}
 	}
 }
+
+func TestGetLastCommit(t *testing.T) {
+	gs := createTestRepo(t)
+	defer cleanup(t, gs)
+
+	pageName := createIndexPage(t, gs)
+
+	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
+	msg := "import index.md"
+	_, _, err := gs.CommitFile(pageName, sig, msg)
+	checkFatal(t, err)
+
+	lastcommit, err := gs.GetLastCommit("index.md")
+	checkFatal(t, err)
+	if lastcommit.Message != msg {
+		t.Fatalf("Commit message should be \"%s\", is \"%s\"", msg, lastcommit.Message)
+	}
+}
