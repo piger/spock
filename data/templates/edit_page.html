@@ -10,7 +10,7 @@
       <h2>Edit page {{.pageName}}</h2>
       {{end}}
 
-      <form id="editor-form" name="editor" action="" method="post">
+      <form id="editor-form" name="editor" action="?edit=1" method="post">
         <div class="editor-wrapper">
           <div id="editor">{{.content}}</div>
           <div id="editor-statusbar">{{.pageName}} <span id="status-text">*</span></div>
@@ -39,7 +39,7 @@
  $(document).ready(function() {
    $("#cancel-btn").on('click', function () {
      var u = window.location.href;
-     window.location.href = u.replace("?edit", "");
+     window.location.href = u.replace("?edit=1", "");
    });
  });
 </script>
