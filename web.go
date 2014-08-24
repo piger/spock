@@ -104,10 +104,7 @@ func newTemplateContext(r *vRequest) map[string]interface{} {
 // views
 
 func Index(w http.ResponseWriter, r *vRequest) {
-	context := make(map[string]interface{})
-	context["foo"] = "bar"
-
-	r.Ctx.RenderTemplate("index.html", context, w)
+	http.Redirect(w, r.Request, "/index", http.StatusFound)
 }
 
 func Login(w http.ResponseWriter, r *vRequest) {
