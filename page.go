@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// the optional YAML header of a wiki page.
 type PageHeader struct {
 	Title       string
 	Description string
@@ -20,6 +21,8 @@ type PageHeader struct {
 	Markup      string
 }
 
+// A wiki page. The Path attribute contains the relative path to the file
+// containing the wiki page (e.g. docs/programming/python.md).
 type Page struct {
 	Path     string
 	Header   *PageHeader
@@ -65,6 +68,7 @@ func LoadPage(path, relpath string) (*Page, error) {
 	return page, nil
 }
 
+// A "short name" for a wiki page complete path.
 func (page *Page) ShortName() string {
 	ext := filepath.Ext(page.Path)
 	if len(ext) > 0 {
