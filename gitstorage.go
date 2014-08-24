@@ -5,12 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 )
-
-var GitCommandName string = "git"
 
 var baseGitIgnore string = `*~
 *.bak
@@ -24,25 +21,11 @@ type CommitSignature struct {
 
 type GitStorage struct {
 	WorkDir string
-	GitDir  string
-	GitBin  string
 	r       *git.Repository
 }
 
 func NewGitStorage(path string) (*GitStorage, error) {
-	gitBin, err := exec.LookPath(GitCommandName)
-	if err != nil {
-		return nil, err
-	}
-
-	gitDir := filepath.Join(path, ".git")
-
-	gitstorage := &GitStorage{
-		WorkDir: path,
-		GitDir:  gitDir,
-		GitBin:  gitBin,
-	}
-
+	gitstorage := &GitStorage{WorkDir: path}
 	return gitstorage, nil
 }
 
@@ -52,17 +35,6 @@ func (gs *GitStorage) MakeAbsPath(path string) string {
 	}
 
 	return filepath.Join(gs.WorkDir, path)
-}
-
-func (gs *GitStorage) RunGitCommand(command string, args ...string) (output string, err error) {
-	var cmdArgs []string = []string{"-C", gs.WorkDir, command}
-	cmdArgs = append(cmdArgs, args...)
-
-	cmd := exec.Command(gs.GitBin, cmdArgs...)
-	var out []byte
-	out, err = cmd.CombinedOutput()
-	output = string(out)
-	return
 }
 
 func (gs *GitStorage) InitRepository() error {
