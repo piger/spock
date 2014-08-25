@@ -68,6 +68,15 @@ func LoadPage(path, relpath string) (*Page, error) {
 	return page, nil
 }
 
+func ShortenPageName(name string) string {
+	if ext := filepath.Ext(name); len(ext) > 0 {
+		l := len(name) - len(ext)
+		return name[0:l]
+	} else {
+		return name
+	}
+}
+
 // A "short name" for a wiki page complete path.
 func (page *Page) ShortName() string {
 	ext := filepath.Ext(page.Path)

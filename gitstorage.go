@@ -426,3 +426,52 @@ func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string)
 	_, _, err = gs.CommitFile(page.Path, sig, message)
 	return err
 }
+
+func (gs *GitStorage) ListPages() ([]string, error) {
+	var result []string
+
+	exts := make(map[string]bool)
+	for _, ext := range PAGE_EXTENSIONS {
+		exts["."+ext] = true	
+	}
+
+	head, err := gs.r.Head()
+	if err != nil {
+		return result, err
+	}
+	commit, err := gs.r.LookupCommit(head.Target())
+	if err != nil {
+		return result, err
+	}
+	tree, err := commit.Tree()
+	if err != nil {
+		return result, err
+	}
+
+	err = tree.Walk(func(root string, t *git.TreeEntry) int {
+		switch git.Filemode(t.Filemode) {
+		case git.FilemodeBlob:
+			pageext := filepath.Ext(t.Name)
+			if len(pageext) > 0 {
+				if _, ok := exts[pageext]; ok {
+					result = append(result, ShortenPageName(root+t.Name))
+				}
+			}
+		case git.FilemodeBlobExecutable:
+			pageext := filepath.Ext(t.Name)
+			if len(pageext) > 0 {
+				if _, ok := exts[pageext]; ok {
+					result = append(result, ShortenPageName(root+t.Name))
+				}
+			}
+		}
+
+		// to avoid going into sibdirectories return 1
+		return 0
+	})
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}

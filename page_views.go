@@ -150,3 +150,16 @@ func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 	ctx["details"] = details
 	r.Ctx.RenderTemplate("log.html", ctx, w)
 }
+
+func ListPages(w http.ResponseWriter, r *vRequest) {
+	pages, err := (*r.Ctx.Storage).ListPages()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ctx:= newTemplateContext(r)
+	ctx["pages"] = pages
+
+	r.Ctx.RenderTemplate("ls.html", ctx, w)
+}

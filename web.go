@@ -212,6 +212,8 @@ func RunServer(address string, storage Storage) error {
 	r.Handle("/", WithRequest(ac, vHandlerFunc(Index))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
 	r.Handle("/logout", WithRequest(ac, vHandlerFunc(Logout))).Name("logout")
+	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
+
 	r.Handle("/{pagepath:[a-zA-Z0-9/]+}", WithRequest(ac, vHandlerFunc(EditPage))).Queries("edit", "1").Name("edit_page")
 	r.Handle("/{pagepath:[a-zA-Z0-9/]+}", WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("log", "1").Name("show_log")
 	r.Handle("/{pagepath:[a-zA-Z0-9/]+}", WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")

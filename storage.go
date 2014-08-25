@@ -15,6 +15,7 @@ type Storage interface {
 	LookupPage(pagepath string) (*Page, bool, error)
 	GetLastCommit(path string) (*CommitLog, error)
 	SavePage(page *Page, sig *CommitSignature, message string) error
+	ListPages() ([]string, error)
 }
 
 type CommitLog struct {
