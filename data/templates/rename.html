@@ -8,7 +8,7 @@
 
       <form action="" method="post" role="form">
 
-        <div class="form-group">
+        <div class="form-group {{if .formError}}has-error{{end}}">
           <input type="text" class="form-control" name="new-name" id="new-name" placeholder="new name">
         </div>
 

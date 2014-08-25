@@ -163,3 +163,58 @@ func ListPages(w http.ResponseWriter, r *vRequest) {
 
 	r.Ctx.RenderTemplate("ls.html", ctx, w)
 }
+
+func RenamePage(w http.ResponseWriter, r *vRequest) {
+	pagepath := getPagePath(r)
+	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !exists {
+		http.NotFound(w, r.Request)
+		return
+	}
+
+	var formError bool
+	ctx:= newTemplateContext(r)
+	ctx["pageName"] = page.ShortName()
+
+	if r.Request.Method == "POST" {
+		if err = r.Request.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		newname := r.Request.PostFormValue("new-name")
+		comment := r.Request.PostFormValue("comment")
+		if newname == "" {
+			formError = true
+		}
+
+		if comment == "" {
+			comment = "(no comment)"
+		}
+
+		fullname, email := LookupAuthor(r)
+		sig := &CommitSignature{
+			Name: fullname,
+			Email: email,
+			When: time.Now(),
+		}
+
+		// Rename the page here!
+		if !formError {
+			_, _, err = (*r.Ctx.Storage).RenamePage(page.Path, newname, sig, comment)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			http.Redirect(w, r.Request, "/"+newname, http.StatusSeeOther)
+		}
+	}
+
+	ctx["formError"] = formError
+
+	r.Ctx.RenderTemplate("rename.html", ctx, w)
+}
