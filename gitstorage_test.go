@@ -56,6 +56,16 @@ func createIndexPage(t *testing.T, gs *GitStorage) string {
 	return pageName
 }
 
+func createTestPage(t *testing.T, gs *GitStorage, path, content, authorName, authorEmail, message string, when time.Time) string {
+	pagePath := filepath.Join(gs.WorkDir, path)
+	checkFatal(t, ioutil.WriteFile(pagePath, []byte(content), 0644))
+	sig := &CommitSignature{Name: authorName, Email: authorEmail, When: when}
+	_, _, err := gs.CommitFile(path, sig, message)
+	checkFatal(t, err)
+
+	return path
+}
+
 func createSignature(t *testing.T) *CommitSignature {
 	loc, err := time.LoadLocation("Europe/Rome")
 	checkFatal(t, err)
@@ -67,6 +77,8 @@ func createSignature(t *testing.T) *CommitSignature {
 	return sig
 }
 
+
+// Tests
 func TestInitRepository(t *testing.T) {
 	gs := createTestRepo(t)
 	defer cleanup(t, gs)
@@ -171,6 +183,7 @@ func TestLogsForPage(t *testing.T) {
 	}
 }
 
+
 func TestGetLastCommit(t *testing.T) {
 	gs := createTestRepo(t)
 	defer cleanup(t, gs)
@@ -186,5 +199,19 @@ func TestGetLastCommit(t *testing.T) {
 	checkFatal(t, err)
 	if lastcommit.Message != msg {
 		t.Fatalf("Commit message should be \"%s\", is \"%s\"", msg, lastcommit.Message)
+	}
+}
+
+func TestListPages(t *testing.T) {
+	gs := createTestRepo(t)
+	defer cleanup(t, gs)
+
+	createTestPage(t, gs, "index.md", "this is my index", "test user", "test@email.com", "created", time.Now())
+	createTestPage(t, gs, "foobar.md", "my foobar page!", "test user", "test@email.com", "created", time.Now())
+
+	pages, err := gs.ListPages()
+	checkFatal(t, err)
+	if len(pages) != 2 {
+		t.Fatal("There should be 2 pages, there are %d", len(pages))
 	}
 }
