@@ -14,19 +14,6 @@ var baseGitIgnore string = `*~
 *.bak
 `
 
-// Like "mkdir -p"
-func MkMissingDirs(filename string) error {
-	dirname := filepath.Dir(filename)
-
-	if _, err := os.Stat(dirname); err != nil {
-		if err := os.MkdirAll(dirname, 0755); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 type GitStorage struct {
 	WorkDir string
 	r       *git.Repository
