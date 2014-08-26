@@ -158,7 +158,7 @@ func ListPages(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	ctx:= newTemplateContext(r)
+	ctx := newTemplateContext(r)
 	ctx["pages"] = pages
 
 	r.Ctx.RenderTemplate("ls.html", ctx, w)
@@ -176,7 +176,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 	}
 
 	var formError bool
-	ctx:= newTemplateContext(r)
+	ctx := newTemplateContext(r)
 	ctx["pageName"] = page.ShortName()
 
 	if r.Request.Method == "POST" {
@@ -197,9 +197,9 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 
 		fullname, email := LookupAuthor(r)
 		sig := &CommitSignature{
-			Name: fullname,
+			Name:  fullname,
 			Email: email,
-			When: time.Now(),
+			When:  time.Now(),
 		}
 
 		// Rename the page here!
@@ -217,4 +217,26 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 	ctx["formError"] = formError
 
 	r.Ctx.RenderTemplate("rename.html", ctx, w)
+}
+
+func DiffPage(w http.ResponseWriter, r *vRequest) {
+	pagepath := getPagePath(r)
+	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !exists {
+		http.NotFound(w, r.Request)
+		return
+	}
+
+	vars := mux.Vars(r.Request)
+	shaParam := vars["sha"]
+	_, err = (*r.Ctx.Storage).DiffPage(page, shaParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// INSERT CODE HERE
 }

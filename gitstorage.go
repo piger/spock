@@ -2,6 +2,7 @@ package spock
 
 import (
 	"errors"
+	"fmt"
 	"github.com/piger/git2go"
 	"io/ioutil"
 	"log"
@@ -465,6 +466,133 @@ func (gs *GitStorage) ListPages() ([]string, error) {
 	})
 	if err != nil {
 		return result, err
+	}
+
+	return result, nil
+}
+
+func (gs *GitStorage) DiffPage(page *Page, otherSha string) ([]string, error) {
+	// last commit for file
+	lastCommitLog, err := gs.GetLastCommit(page.Path)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	currentOid, err := git.NewOid(lastCommitLog.Id)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	currentCommit, err := gs.r.LookupCommit(currentOid)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	currentTree, err := currentCommit.Tree()
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	// other commit
+	otherOid, err := git.NewOid(otherSha)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	otherCommit, err := gs.r.LookupCommit(otherOid)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	otherTree, err := otherCommit.Tree()
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	// run git diff
+	diffopts, err := git.DefaultDiffOptions()
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	diff, err := gs.r.DiffTreeToTree(currentTree, otherTree, &diffopts)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	files := make([]string, 0)
+	hunks := make([]git.DiffHunk, 0)
+	lines := make([]git.DiffLine, 0)
+	err = diff.ForEach(func(file git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
+		var skip bool
+
+		if file.OldFile.Path != page.Path {
+			skip = true
+		}
+
+		if !skip {
+			files = append(files, file.OldFile.Path)
+		}
+		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
+			if !skip {
+				hunks = append(hunks, hunk)
+			}
+			return func(line git.DiffLine) error {
+				if !skip {
+					lines = append(lines, line)
+				}
+				return nil
+			}, nil
+		}, nil
+	}, git.DiffDetailLines)
+
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	log.Print(files)
+	log.Print(hunks)
+
+	for _, line := range lines {
+		if line.Origin == git.DiffLineAddition {
+			fmt.Printf("+ %s", line.Content)
+		} else if line.Origin == git.DiffLineDeletion {
+			fmt.Printf("- %s", line.Content)
+		} else if line.Origin == git.DiffLineContext {
+			fmt.Println(line.Content)
+		}
+	}
+
+	fmt.Printf("\n#########################################\n")
+
+	result := make([]string, 0)
+
+	dlen, err := diff.NumDeltas()
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	for i := 0; i < dlen; i++ {
+		patch, err := diff.Patch(i)
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
+		if patchStr, err := patch.String(); err == nil {
+			result = append(result, patchStr)
+
+			fmt.Printf("%s\n", patchStr)
+			fmt.Println("END OF PATCH")
+		} else {
+			fmt.Print(err)
+		}
 	}
 
 	return result, nil

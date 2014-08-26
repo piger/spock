@@ -16,6 +16,7 @@ type Storage interface {
 	GetLastCommit(path string) (*CommitLog, error)
 	SavePage(page *Page, sig *CommitSignature, message string) error
 	ListPages() ([]string, error)
+	DiffPage(page *Page, otherSha string) ([]string, error)
 }
 
 type CommitLog struct {
