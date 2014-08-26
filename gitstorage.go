@@ -451,14 +451,7 @@ func (gs *GitStorage) ListPages() ([]string, error) {
 
 	err = tree.Walk(func(root string, t *git.TreeEntry) int {
 		switch git.Filemode(t.Filemode) {
-		case git.FilemodeBlob:
-			pageext := filepath.Ext(t.Name)
-			if len(pageext) > 0 {
-				if _, ok := exts[pageext]; ok {
-					result = append(result, ShortenPageName(root+t.Name))
-				}
-			}
-		case git.FilemodeBlobExecutable:
+		case git.FilemodeBlob, git.FilemodeBlobExecutable:
 			pageext := filepath.Ext(t.Name)
 			if len(pageext) > 0 {
 				if _, ok := exts[pageext]; ok {
