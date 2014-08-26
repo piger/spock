@@ -15,8 +15,9 @@ var baseGitIgnore string = `*~
 `
 
 type GitStorage struct {
-	WorkDir string
-	r       *git.Repository
+	WorkDir         string
+	IndexServerAddr string
+	r               *git.Repository
 }
 
 func NewGitStorage(path string) (*GitStorage, error) {
@@ -432,7 +433,7 @@ func (gs *GitStorage) ListPages() ([]string, error) {
 
 	exts := make(map[string]bool)
 	for _, ext := range PAGE_EXTENSIONS {
-		exts["."+ext] = true	
+		exts["."+ext] = true
 	}
 
 	head, err := gs.r.Head()
