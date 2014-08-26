@@ -471,43 +471,34 @@ func (gs *GitStorage) ListPages() ([]string, error) {
 	return result, nil
 }
 
-func (gs *GitStorage) DiffPage(page *Page, otherSha string) ([]string, error) {
+// Return the git.Tree of the specified SHA id.
+func (gs *GitStorage) treeFromId(id string) (*git.Tree, error) {
+	oid, err := git.NewOid(id)
+	if err != nil {
+		return nil, err
+	}
+	commit, err := gs.r.LookupCommit(oid)
+	if err != nil {
+		return nil, err
+	}
+	return commit.Tree()
+}
+
+func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
 	// last commit for file
 	lastCommitLog, err := gs.GetLastCommit(page.Path)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
-	currentOid, err := git.NewOid(lastCommitLog.Id)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	currentCommit, err := gs.r.LookupCommit(currentOid)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	currentTree, err := currentCommit.Tree()
+	currentTree, err := gs.treeFromId(lastCommitLog.Id)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 
 	// other commit
-	otherOid, err := git.NewOid(otherSha)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	otherCommit, err := gs.r.LookupCommit(otherOid)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	otherTree, err := otherCommit.Tree()
+	otherTree, err := gs.treeFromId(otherId)
 	if err != nil {
 		log.Print(err)
 		return nil, err
