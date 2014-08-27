@@ -232,11 +232,14 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 
 	vars := mux.Vars(r.Request)
 	shaParam := vars["sha"]
-	_, err = (*r.Ctx.Storage).DiffPage(page, shaParam)
+	diffs, err := (*r.Ctx.Storage).DiffPage(page, shaParam)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// INSERT CODE HERE
+	ctx := newTemplateContext(r)
+	ctx["Diffs"] = diffs
+
+	r.Ctx.RenderTemplate("diff.html", ctx, w)
 }

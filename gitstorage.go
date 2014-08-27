@@ -548,20 +548,20 @@ func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
 		return nil, err
 	}
 
-	log.Print(files)
-	log.Print(hunks)
+	// log.Print(files)
+	// log.Print(hunks)
 
 	for _, line := range lines {
 		if line.Origin == git.DiffLineAddition {
-			fmt.Printf("+ %s", line.Content)
+			// fmt.Printf("+ %s", line.Content)
 		} else if line.Origin == git.DiffLineDeletion {
-			fmt.Printf("- %s", line.Content)
+			// fmt.Printf("- %s", line.Content)
 		} else if line.Origin == git.DiffLineContext {
-			fmt.Println(line.Content)
+			// fmt.Println(line.Content)
 		}
 	}
 
-	fmt.Printf("\n#########################################\n")
+	// fmt.Printf("\n#########################################\n")
 
 	result := make([]string, 0)
 
@@ -570,7 +570,19 @@ func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
 		log.Print(err)
 		return nil, err
 	}
+
 	for i := 0; i < dlen; i++ {
+		delta, err := diff.GetDelta(i)
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
+
+		// skip patches for other files
+		if delta.OldFile.Path != page.Path {
+			continue
+		}
+
 		patch, err := diff.Patch(i)
 		if err != nil {
 			log.Print(err)
@@ -579,8 +591,8 @@ func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
 		if patchStr, err := patch.String(); err == nil {
 			result = append(result, patchStr)
 
-			fmt.Printf("%s\n", patchStr)
-			fmt.Println("END OF PATCH")
+			// fmt.Printf("%s\n", patchStr)
+			// fmt.Println("END OF PATCH")
 		} else {
 			fmt.Print(err)
 		}
