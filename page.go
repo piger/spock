@@ -6,11 +6,11 @@ import (
 	"github.com/russross/blackfriday"
 	"gopkg.in/yaml.v1"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"log"
 )
 
 // the optional YAML header of a wiki page.
@@ -127,8 +127,21 @@ func renderMarkdown(content []byte) ([]byte, error) {
 	return blackfriday.Markdown(content, renderer, extensions), nil
 }
 
+// Lookup the correct 'rst2html' program inspecting $PATH
+func lookupRst() (string, error) {
+	var names []string = []string{"rst2html", "rst2html.py"}
+
+	for _, name := range names {
+		if rstbin, err := exec.LookPath(name); err == nil {
+			return rstbin, nil
+		}
+	}
+
+	return "", errors.New("rst2html program not found")
+}
+
 func renderRst(content []byte) ([]byte, error) {
-	rst2html, err := exec.LookPath("rst2html")
+	rst2html, err := lookupRst()
 	if err != nil {
 		return []byte(""), err
 	}
