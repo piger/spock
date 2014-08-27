@@ -511,7 +511,7 @@ func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
 		return nil, err
 	}
 
-	diff, err := gs.r.DiffTreeToTree(currentTree, otherTree, &diffopts)
+	diff, err := gs.r.DiffTreeToTree(otherTree, currentTree, &diffopts)
 	if err != nil {
 		log.Print(err)
 		return nil, err
