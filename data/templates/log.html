@@ -6,17 +6,20 @@
 
       <h2>Log for {{.pageName}}</h2>
 
-      {{range .details}}
-      <div class="media">
-        <a class="pull-left" href="mailto:{{.email}}">
-          <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .email}}?s=32" alt="{{.AuthorEmail}}">
-        </a>
-        <div class="media-body">
-          <h4 class="media-heading">{{.sha}}</h4>
-          <h5>{{.name}} on {{formatDatetime .when "Mon Jan 2 15:04 2006"}}</h5>
-          <pre>{{.message}}</pre>
-        </div>
-      </div><!-- /.media -->
+      {{range $i, $e := .details}}
+        <div class="media">
+          <a class="pull-left" href="mailto:{{.email}}">
+            <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .email}}?s=32" alt="{{.AuthorEmail}}">
+          </a>
+          <div class="media-body">
+            {{if eq $i 0}}<h4 class="media-heading">{{.sha}} {{if eq $i 0 }}(current){{end}}</h4>
+            {{else}}
+            <h4 class="media-heading"><a href="?diff={{.sha}}">{{.sha}}</a></h4>
+            {{end}}
+            <h5>{{.name}} on {{formatDatetime .when "Mon Jan 2 15:04 2006"}}</h5>
+            <pre>{{.message}}</pre>
+          </div>
+        </div><!-- /.media -->
       {{end}}
 
     </div>
