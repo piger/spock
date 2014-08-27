@@ -61,28 +61,29 @@ func LoadPage(path, relpath string) (*Page, error) {
 	page := NewPage(relpath)
 	page.RawBytes = data
 
-	if string(data[0:3]) != "---" {
+	hdrtag := []byte("---")
+
+	// if the first bytes does not contain the YAML header
+	if string(data[0:3]) != string(hdrtag) {
 		page.Content = data
 	} else {
+		// read and parse the YAML header
 		var header []byte
 
 		// find the second yaml marker "---": we skip the first 3 bytes as we need to find
 		// the *second* row of "---"; after we have found the position we add back the 3
 		// bytes, to account for the first "---". Clear uh?
-		mark := bytes.Index(data[3:], []byte("---"))
+		mark := bytes.Index(data[len(hdrtag):], hdrtag)
 		if mark == -1 {
 			return nil, errors.New("Cannot find the closing YAML marker")
 		}
-		mark += 3
+		mark += len(hdrtag)
 
 		// cross-platform way to find the end of the line
 		eolMark := bytes.Index(data[mark:], []byte("\n"))
 		if eolMark == -1 {
 			return nil, errors.New("Cannot find the second newline character")
 		}
-		// YAML header ends at mark, but mark is a relative position; to fix this
-		// we add the length of the first "---" and the length of the second "---"
-		// plus a newline character.
 		headerEnd := mark + eolMark
 		header = data[0:headerEnd]
 		page.Content = data[headerEnd:]
