@@ -3,6 +3,7 @@ package spock
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/russross/blackfriday"
 	"gopkg.in/yaml.v1"
 	"io/ioutil"
@@ -12,6 +13,16 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+// rst2html program path
+var rst2htmlPath string
+
+func init() {
+	var err error
+	if rst2htmlPath, err = lookupRst(); err != nil {
+		log.Fatal(err)
+	}
+}
 
 // the optional YAML header of a wiki page.
 type PageHeader struct {
@@ -31,6 +42,12 @@ type Page struct {
 	Content  []byte
 }
 
+func NewPage(path string) *Page {
+	pageHdr := &PageHeader{}
+	page := &Page{Path: path, Header: pageHdr}
+	return page
+}
+
 func LoadPage(path, relpath string) (*Page, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -41,8 +58,8 @@ func LoadPage(path, relpath string) (*Page, error) {
 		return nil, err
 	}
 
-	pagehdr := &PageHeader{}
-	page := &Page{Path: relpath, RawBytes: data, Header: pagehdr}
+	page := NewPage(relpath)
+	page.RawBytes = data
 
 	if string(data[0:3]) != "---" {
 		page.Content = data
@@ -141,21 +158,16 @@ func lookupRst() (string, error) {
 }
 
 func renderRst(content []byte) ([]byte, error) {
-	rst2html, err := lookupRst()
-	if err != nil {
-		return []byte(""), err
-	}
-
-	cmd := exec.Command(rst2html, "--template", "data/rst_template.txt")
+	cmd := exec.Command(rst2htmlPath, "--template", "data/rst_template.txt")
 	cmd.Stdin = strings.NewReader(string(content))
 	var out, errout bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &errout
-	err = cmd.Run()
+	err := cmd.Run()
 
 	errStr := string(errout.Bytes())
 	if len(errStr) > 0 {
-		log.Print(string(errout.Bytes()))
+		fmt.Print(errStr)
 	}
 
 	return out.Bytes(), err
