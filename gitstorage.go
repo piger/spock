@@ -321,9 +321,9 @@ func (gs *GitStorage) LookupPage(pagepath string) (*Page, bool, error) {
 	}
 
 	if !found {
-		// XXX this is not nice.
 		// append the default extension
-		return &Page{Path: pagepath + ".md"}, false, nil
+		emptyPage := NewPage(pagepath + ".md")
+		return emptyPage, false, nil
 	}
 
 	page, err := LoadPage(absbasepath, pagepath)
