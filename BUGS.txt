@@ -1,0 +1,15 @@
+# BUGS
+
+- saving Nginx.txt page cause a panic
+- parsing of YAML header must be rewritten:
+
+```
+2014/08/27 10:38:13 page.go:133: <stdin>:1: (SEVERE/4) Title overline & underline mismatch.
+
+####
+Nginx
+#####
+Exiting due to level-4 (SEVERE) system message.
+```
+
+As you can see the first line of '###' is missing a character.
