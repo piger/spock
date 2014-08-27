@@ -41,7 +41,8 @@ func LoadPage(path, relpath string) (*Page, error) {
 		return nil, err
 	}
 
-	page := &Page{Path: relpath, RawBytes: data}
+	pagehdr := &PageHeader{}
+	page := &Page{Path: relpath, RawBytes: data, Header: pagehdr}
 
 	if string(data[0:3]) != "---" {
 		page.Content = data
