@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"log"
 )
 
 // the optional YAML header of a wiki page.
@@ -117,16 +118,19 @@ func renderMarkdown(content []byte) ([]byte, error) {
 }
 
 func renderRst(content []byte) ([]byte, error) {
-	rst2html, err := exec.LookPath("rst2html.py")
+	rst2html, err := exec.LookPath("rst2html")
 	if err != nil {
-		return []byte(""), nil
+		return []byte(""), err
 	}
 
 	cmd := exec.Command(rst2html, "--template", "data/rst_template.txt")
 	cmd.Stdin = strings.NewReader(string(content))
-	var out bytes.Buffer
+	var out, errout bytes.Buffer
 	cmd.Stdout = &out
+	cmd.Stderr = &errout
 	err = cmd.Run()
+
+	log.Print(string(errout.Bytes()))
 
 	return out.Bytes(), err
 }
