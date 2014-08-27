@@ -89,10 +89,10 @@ func (page *Page) ShortName() string {
 }
 
 func (page *Page) Render() ([]byte, error) {
-	if strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
-		return renderMarkdown(page.Content)
-	} else if strings.HasSuffix(page.Path, ".rst") {
+	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
 		return renderRst(page.Content)
+	} else if page.Header.Markup == "markdown" || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
+		return renderMarkdown(page.Content)
 	}
 
 	return []byte(page.Content), errors.New("Unknown format")
