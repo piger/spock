@@ -130,7 +130,10 @@ func renderRst(content []byte) ([]byte, error) {
 	cmd.Stderr = &errout
 	err = cmd.Run()
 
-	log.Print(string(errout.Bytes()))
+	errStr := string(errout.Bytes())
+	if len(errStr) > 0 {
+		log.Print(string(errout.Bytes()))
+	}
 
 	return out.Bytes(), err
 }
