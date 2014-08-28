@@ -201,6 +201,7 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"rename.html",
 		"results.html",
 		"diff.html",
+		"preview.html",
 	}
 	baseTemplate := filepath.Join(DataDir, "templates", "base.html")
 	extraTemplate := filepath.Join(DataDir, "templates", "_extra.html")

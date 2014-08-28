@@ -135,6 +135,16 @@ func (page *Page) Render() ([]byte, error) {
 	return []byte(page.Content), errors.New("Unknown format")
 }
 
+func (page *Page) RenderContent(content string) ([]byte, error) {
+	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
+		return renderRst([]byte(content))
+	} else if page.Header.Markup == "markdown" || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
+		return renderMarkdown([]byte(content))
+	}
+
+	return []byte(page.Content), errors.New("Unknown format")
+}
+
 func renderMarkdown(content []byte) ([]byte, error) {
 	// Add TOC to the HTML output
 	htmlFlags := 0

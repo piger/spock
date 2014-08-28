@@ -91,6 +91,13 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 		content := r.Request.PostFormValue("content")
 		comment := r.Request.PostFormValue("comment")
+		doPreview := r.Request.PostFormValue("preview")
+
+		if doPreview != "" {
+			ShowPreview(page, content, w, r)
+			return
+		}
+
 		if comment == "" {
 			comment = "(no comment)"
 		}
@@ -136,6 +143,19 @@ func LookupAuthor(r *vRequest) (fullname, email string) {
 	}
 
 	return
+}
+
+func ShowPreview(page *Page, content string, w http.ResponseWriter, r *vRequest) {
+	ctx := newTemplateContext(r)
+	ctx["pageName"] = page.ShortName()
+
+	html, err := page.RenderContent(content)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ctx["preview"] = template.HTML(html)
+	r.Ctx.RenderTemplate("preview.html", ctx, w)
 }
 
 func ShowPageLog(w http.ResponseWriter, r *vRequest) {
