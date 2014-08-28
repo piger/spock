@@ -3,9 +3,9 @@ package spock
 import (
 	"github.com/gorilla/mux"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
-	"log"
 )
 
 const (
@@ -245,7 +245,6 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 	r.Ctx.RenderTemplate("diff.html", ctx, w)
 }
 
-
 type searchResult struct {
 	Title     string
 	Lang      string
@@ -277,7 +276,7 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	result, err := (*r.Ctx.Storage).Search(query)
+	result, err := r.Ctx.Search(query)
 	if err != nil {
 		log.Printf("Search error: %s\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -290,7 +289,7 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 
 	var rv []*searchResult
 	for _, r := range result.Results {
-		sr := &searchResult{Title: r.Title, Lang: r.Lang, Highlight: template.HTML(r.Highlight)}
+		sr := &searchResult{Title: ShortenPageName(r.Title), Lang: r.Lang, Highlight: template.HTML(r.Highlight)}
 		rv = append(rv, sr)
 	}
 	ctx["results"] = rv

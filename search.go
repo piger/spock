@@ -25,7 +25,7 @@ type ResultType struct {
 	Highlight string
 }
 
-func (gs *GitStorage) Search(query string) (*ResponseType, error) {
+func (ac *AppContext) Search(query string) (*ResponseType, error) {
 	postData := make(map[string]string)
 	postData["query"] = query
 
@@ -35,7 +35,7 @@ func (gs *GitStorage) Search(query string) (*ResponseType, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", gs.IndexServerAddr+"/search", bytes.NewReader(jsonPostData))
+	req, err := http.NewRequest("POST", ac.IndexSrv+"/search", bytes.NewReader(jsonPostData))
 	if err != nil {
 		log.Printf("Error creating HTTP request: %s\n", err)
 		return nil, err
@@ -67,7 +67,7 @@ func (gs *GitStorage) Search(query string) (*ResponseType, error) {
 	return &jsontype.Result, nil
 }
 
-func (gs *GitStorage) IndexDocument(title string) error {
+func (ac *AppContext) IndexDocument(title string) error {
 	postData := make(map[string]string)
 	postData["name"] = title
 	jsonPostData, err := json.Marshal(postData)
@@ -76,7 +76,7 @@ func (gs *GitStorage) IndexDocument(title string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", gs.IndexServerAddr+"/add", bytes.NewReader(jsonPostData))
+	req, err := http.NewRequest("POST", ac.IndexSrv+"/add", bytes.NewReader(jsonPostData))
 	if err != nil {
 		log.Print(err)
 		return err

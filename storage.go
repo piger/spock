@@ -17,9 +17,6 @@ type Storage interface {
 	SavePage(page *Page, sig *CommitSignature, message string) error
 	ListPages() ([]string, error)
 	DiffPage(page *Page, otherSha string) ([]string, error)
-
-	Search(query string) (*ResponseType, error)
-	IndexDocument(title string) error
 }
 
 type CommitLog struct {
