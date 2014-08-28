@@ -17,6 +17,14 @@ import (
 // rst2html program path
 var rst2htmlPath string
 
+var NewPageContent string = `---
+title: "My page"
+description: "A brief page description..."
+tags: [ "general" ]
+language: "it"
+---
+`
+
 func init() {
 	var err error
 	if rst2htmlPath, err = lookupRst(); err != nil {

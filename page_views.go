@@ -29,7 +29,7 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	} else if !exists {
-		http.NotFound(w, r.Request)
+		EditNewPage(page, w, r)
 		return
 	}
 
@@ -56,6 +56,17 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 	r.Ctx.RenderTemplate("page.html", ctx, w)
 }
 
+func EditNewPage(page *Page, w http.ResponseWriter, r *vRequest) {
+	ctx := newTemplateContext(r)
+
+	ctx["content"] = template.HTML(NewPageContent)
+	ctx["pageName"] = page.ShortName()
+	ctx["isNew"] = true
+	ctx["comment"] = ""
+
+	r.Ctx.RenderTemplate("edit_page.html", ctx, w)
+}
+
 func EditPage(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
 	page, _, err := (*r.Ctx.Storage).LookupPage(pagepath)
@@ -63,10 +74,6 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// else if !exists {
-	//		http.NotFound(w, r.Request)
-	//		return
-	//	}
 
 	if r.Request.Method == "POST" {
 		if err := r.Request.ParseForm(); err != nil {
