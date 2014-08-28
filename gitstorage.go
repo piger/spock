@@ -22,7 +22,7 @@ type GitStorage struct {
 }
 
 func NewGitStorage(path string) (*GitStorage, error) {
-	gitstorage := &GitStorage{WorkDir: path}
+	gitstorage := &GitStorage{WorkDir: path, IndexServerAddr: "http://127.0.0.1:5000/api"}
 	return gitstorage, nil
 }
 
@@ -31,7 +31,7 @@ func OpenGitStorage(path string) (*GitStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-	gitstorage := &GitStorage{WorkDir: path, r: repo}
+	gitstorage := &GitStorage{WorkDir: path, r: repo, IndexServerAddr: "http://127.0.0.1:5000/api"}
 	return gitstorage, nil
 }
 

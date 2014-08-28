@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"time"
+	"log"
 )
 
 const (
@@ -242,4 +243,57 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 	ctx["Diffs"] = diffs
 
 	r.Ctx.RenderTemplate("diff.html", ctx, w)
+}
+
+
+type searchResult struct {
+	Title     string
+	Lang      string
+	Highlight template.HTML
+}
+
+func SearchPages(w http.ResponseWriter, r *vRequest) {
+	if r.Request.Method != "POST" {
+		http.Redirect(w, r.Request, "/index", http.StatusFound)
+		return
+	}
+
+	if err := r.Request.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	queries, ok := r.Request.Form["q"]
+	if !ok {
+		log.Println("Empty 'q' parameter for search request")
+		http.Redirect(w, r.Request, "/index", http.StatusFound)
+		return
+	}
+
+	query := queries[0]
+	if len(query) < 1 {
+		log.Println("Zero length search-query parameter")
+		http.Redirect(w, r.Request, "/index", http.StatusFound)
+		return
+	}
+
+	result, err := (*r.Ctx.Storage).Search(query)
+	if err != nil {
+		log.Printf("Search error: %s\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ctx := newTemplateContext(r)
+	ctx["SearchQuery"] = query
+	ctx["Suggestion"] = result.Suggestion
+
+	var rv []*searchResult
+	for _, r := range result.Results {
+		sr := &searchResult{Title: r.Title, Lang: r.Lang, Highlight: template.HTML(r.Highlight)}
+		rv = append(rv, sr)
+	}
+	ctx["results"] = rv
+
+	r.Ctx.RenderTemplate("results.html", ctx, w)
 }
