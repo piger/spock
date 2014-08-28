@@ -43,6 +43,21 @@ func (gs *GitStorage) MakeAbsPath(path string) string {
 	return filepath.Join(gs.WorkDir, path)
 }
 
+func (gs *GitStorage) currentState() (commit *git.Commit, tree *git.Tree, err error) {
+	var head *git.Reference
+	head, err = gs.r.Head()
+	if err != nil {
+		return
+	}
+	commit, err = gs.r.LookupCommit(head.Target())
+	if err != nil {
+		return
+	}
+	tree, err = commit.Tree()
+
+	return
+}
+
 func (gs *GitStorage) InitRepository() error {
 	repo, err := git.InitRepository(gs.WorkDir, false)
 	if err != nil {
@@ -124,11 +139,7 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 		return
 	}
 
-	currentBranch, err := gs.r.Head()
-	if err != nil {
-		return
-	}
-	currentTip, err := gs.r.LookupCommit(currentBranch.Target())
+	currentTip, _, err := gs.currentState()
 	if err != nil {
 		return
 	}
@@ -177,11 +188,7 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 		return
 	}
 
-	currentBranch, err := gs.r.Head()
-	if err != nil {
-		return
-	}
-	currentTip, err := gs.r.LookupCommit(currentBranch.Target())
+	currentTip, _, err := gs.currentState()
 	if err != nil {
 		return
 	}
@@ -223,11 +230,7 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 		return
 	}
 
-	currentBranch, err := gs.r.Head()
-	if err != nil {
-		return
-	}
-	currentTip, err := gs.r.LookupCommit(currentBranch.Target())
+	currentTip, _, err := gs.currentState()
 	if err != nil {
 		return
 	}
@@ -349,15 +352,7 @@ func (o *OidSet) Add(oid *git.Oid) bool {
 }
 
 func (gs *GitStorage) GetLastCommit(path string) (*CommitLog, error) {
-	head, err := gs.r.Head()
-	if err != nil {
-		return nil, err
-	}
-	commit, err := gs.r.LookupCommit(head.Target())
-	if err != nil {
-		return nil, err
-	}
-	tree, err := commit.Tree()
+	commit, tree, err := gs.currentState()
 	if err != nil {
 		return nil, err
 	}
@@ -438,15 +433,7 @@ func (gs *GitStorage) ListPages() ([]string, error) {
 		exts["."+ext] = true
 	}
 
-	head, err := gs.r.Head()
-	if err != nil {
-		return result, err
-	}
-	commit, err := gs.r.LookupCommit(head.Target())
-	if err != nil {
-		return result, err
-	}
-	tree, err := commit.Tree()
+	_, tree, err := gs.currentState()
 	if err != nil {
 		return result, err
 	}
