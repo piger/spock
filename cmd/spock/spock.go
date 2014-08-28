@@ -11,6 +11,7 @@ var (
 	indexSrv = flag.String("indexer", "http://127.0.0.1:5000/api", "Indexer address")
 	repo     = flag.String("repo", ".", "Path to the git repository")
 	initRepo = flag.Bool("init", false, "Initialize a new repository")
+	dataDir  = flag.String("datadir", "./data", "Path to the data directory")
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 		panic(err)
 	}
 
+	spock.DataDir = *dataDir
 	err = spock.RunServer(*address, storage, *indexSrv)
 	if err != nil {
 		log.Fatal(err)

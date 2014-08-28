@@ -167,7 +167,8 @@ func lookupRst() (string, error) {
 }
 
 func renderRst(content []byte) ([]byte, error) {
-	cmd := exec.Command(rst2htmlPath, "--template", "data/rst_template.txt")
+	rstTemplate := filepath.Join(DataDir, "rst_template.txt")
+	cmd := exec.Command(rst2htmlPath, "--template", rstTemplate)
 	cmd.Stdin = strings.NewReader(string(content))
 	var out, errout bytes.Buffer
 	cmd.Stdout = &out

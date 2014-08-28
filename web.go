@@ -13,9 +13,8 @@ import (
 
 var (
 	sessionName  = "vandine-session"
-	templatesDir = "./data/templates"
-	staticDir    = "./data/static"
 	staticPrefix = "/static/"
+	DataDir      = "./data"
 )
 
 // web
@@ -203,9 +202,9 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"results.html",
 		"diff.html",
 	}
-	baseTemplate := filepath.Join(templatesDir, "base.html")
+	baseTemplate := filepath.Join(DataDir, "templates", "base.html")
 	for _, tplName := range templateNames {
-		t := template.Must(template.New(tplName).Funcs(funcMap).ParseFiles(filepath.Join(templatesDir, tplName), baseTemplate))
+		t := template.Must(template.New(tplName).Funcs(funcMap).ParseFiles(filepath.Join(DataDir, "templates", tplName), baseTemplate))
 		templates[tplName] = t
 	}
 	return templates
@@ -224,7 +223,7 @@ func RunServer(address string, storage Storage, indexSrv string) error {
 
 	http.Handle(staticPrefix,
 		http.StripPrefix(staticPrefix,
-			http.FileServer(http.Dir(staticDir))))
+			http.FileServer(http.Dir(filepath.Join(DataDir, "static")))))
 
 	r.Handle("/", WithRequest(ac, vHandlerFunc(Index))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
