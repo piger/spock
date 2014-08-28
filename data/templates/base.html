@@ -33,17 +33,13 @@
 
         <div class="collapse navbar-collapse" id="navbar-menu">
           <ul class="nav navbar-nav">
-            <li><a href="?">View</a></li>
-            <li><a href="?edit=1">Edit</a></li>
-            <li><a href="?log=1">Log</a></li>
             <li><a href="?index">Reindex</a></li>
-            <li><a href="?rename=1">Rename</a></li>
             <li><a href="/ls">All wiki pages</a></li>
           </ul>
 
           <form class="navbar-form navbar-left" role="search" method="post" action="/search">
             <div class="form-group">
-              <input type="text" name="q" class="form-control" placeholder="Search" {{if .SearchQuery}}value="{{.SearchQuery}}"{{end}}>
+              <input type="text" name="q" class="form-control" placeholder="Insert query..." {{if .SearchQuery}}value="{{.SearchQuery}}"{{end}}>
             </div>
             <button type="submit" class="btn btn-default">Search</button>
           </form>

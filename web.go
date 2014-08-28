@@ -203,8 +203,9 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"diff.html",
 	}
 	baseTemplate := filepath.Join(DataDir, "templates", "base.html")
+	extraTemplate := filepath.Join(DataDir, "templates", "_extra.html")
 	for _, tplName := range templateNames {
-		t := template.Must(template.New(tplName).Funcs(funcMap).ParseFiles(filepath.Join(DataDir, "templates", tplName), baseTemplate))
+		t := template.Must(template.New(tplName).Funcs(funcMap).ParseFiles(filepath.Join(DataDir, "templates", tplName), baseTemplate, extraTemplate))
 		templates[tplName] = t
 	}
 	return templates

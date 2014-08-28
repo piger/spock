@@ -12,7 +12,7 @@
       </ol>
       {{end}}
 
-      <a href="/{{.pageName}}">/{{.pageName}}</a>
+      {{template "pageBar" .pageName}}
 
       <div id="content">{{.content}}</div>
     </div>

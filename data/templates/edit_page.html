@@ -4,6 +4,8 @@
   <div class="row">
     <div class="col-md-12">
 
+      {{template "pageBar" .pageName}}
+      
       {{if .isNew}}
       <h2>Create page {{.pageName}}</h2>
       {{else}}
