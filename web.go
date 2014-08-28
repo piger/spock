@@ -24,6 +24,7 @@ type AppContext struct {
 	Storage      *Storage
 	Templates    map[string]*template.Template
 	XsrfSecret   string
+	IndexSrv     string
 }
 
 type vRequest struct {
@@ -197,13 +198,14 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 	return templates
 }
 
-func RunServer(address string, storage Storage) error {
+func RunServer(address string, storage Storage, indexSrv string) error {
 	r := mux.NewRouter()
 
 	ac := &AppContext{
 		SessionStore: sessions.NewCookieStore([]byte("lalala")),
 		Storage:      &storage,
 		Templates:    loadTemplates(r),
+		IndexSrv:     indexSrv,
 	}
 
 	http.Handle(staticPrefix,

@@ -16,22 +16,28 @@ var baseGitIgnore string = `*~
 `
 
 type GitStorage struct {
-	WorkDir         string
-	IndexServerAddr string
-	r               *git.Repository
+	WorkDir string
+	r       *git.Repository
 }
 
 func NewGitStorage(path string) (*GitStorage, error) {
-	gitstorage := &GitStorage{WorkDir: path, IndexServerAddr: "http://127.0.0.1:5000/api"}
+	gitstorage := &GitStorage{WorkDir: path}
 	return gitstorage, nil
 }
 
-func OpenGitStorage(path string) (*GitStorage, error) {
+func OpenGitStorage(path string, create bool) (*GitStorage, error) {
+	if _, err := os.Stat(path); err != nil {
+		if create {
+			return NewGitStorage(path)
+		} else {
+			return nil, err
+		}
+	}
 	repo, err := git.OpenRepository(path)
 	if err != nil {
 		return nil, err
 	}
-	gitstorage := &GitStorage{WorkDir: path, r: repo, IndexServerAddr: "http://127.0.0.1:5000/api"}
+	gitstorage := &GitStorage{WorkDir: path, r: repo}
 	return gitstorage, nil
 }
 
