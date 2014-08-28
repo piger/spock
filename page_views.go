@@ -2,6 +2,7 @@ package spock
 
 import (
 	"code.google.com/p/xsrftoken"
+	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -90,6 +91,9 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 		content := r.Request.PostFormValue("content")
 		comment := r.Request.PostFormValue("comment")
+		if comment == "" {
+			comment = "(no comment)"
+		}
 		fullname, email := LookupAuthor(r)
 
 		page.RawBytes = []byte(content)
@@ -209,7 +213,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 		}
 
 		if comment == "" {
-			comment = "(no comment)"
+			comment = fmt.Sprintf("rename %s to %s", page.Path, newname)
 		}
 
 		fullname, email := LookupAuthor(r)
