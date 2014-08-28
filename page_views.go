@@ -1,6 +1,7 @@
 package spock
 
 import (
+	"code.google.com/p/xsrftoken"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -81,6 +82,12 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			return
 		}
 
+		xsrf := r.Request.PostFormValue("_xsrf")
+		if xsrfValid := xsrftoken.Valid(xsrf, r.Ctx.XsrfSecret, r.AuthUser.Name, "post"); !xsrfValid {
+			http.Error(w, "Invalid XSRF token", http.StatusBadRequest)
+			return
+		}
+
 		content := r.Request.PostFormValue("content")
 		comment := r.Request.PostFormValue("comment")
 		fullname, email := LookupAuthor(r)
@@ -106,6 +113,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 	ctx["pageName"] = page.ShortName()
 	ctx["isNew"] = false
 	ctx["comment"] = ""
+	ctx["_xsrf"] = xsrftoken.Generate(r.Ctx.XsrfSecret, r.AuthUser.Name, "post")
 
 	r.Ctx.RenderTemplate("edit_page.html", ctx, w)
 }

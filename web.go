@@ -124,7 +124,7 @@ func Index(w http.ResponseWriter, r *vRequest) {
 func Login(w http.ResponseWriter, r *vRequest) {
 	var error bool
 
-	if r.Session.Values["logged_in"] == true {
+	if loggedIn, ok := r.Session.Values["logged_in"]; ok && loggedIn.(bool) {
 		http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
 		return
 	}
@@ -216,6 +216,7 @@ func RunServer(address string, storage Storage, indexSrv string) error {
 
 	ac := &AppContext{
 		SessionStore: sessions.NewCookieStore([]byte("lalala")),
+		XsrfSecret:   "lalala",
 		Storage:      &storage,
 		Templates:    loadTemplates(r),
 		IndexSrv:     indexSrv,
