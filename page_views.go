@@ -45,6 +45,7 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
+	ctx["pageName"] = page.ShortName()
 	ctx["content"] = template.HTML(html)
 	ctx["author_email"] = lastlog.Email
 	ctx["author_name"] = lastlog.Name
