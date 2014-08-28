@@ -1,0 +1,5 @@
+spock
+env/
+*.pyc
+*~
+*.egg-info/
