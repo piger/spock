@@ -19,6 +19,35 @@ var (
 )
 
 // web
+type User struct {
+	Authenticated bool
+	Name          string
+	Email         string
+}
+
+func UserFromSession(session *sessions.Session) *User {
+	user := &User{}
+	if loggedIn, ok := session.Values["logged_in"]; ok {
+		user.Authenticated = loggedIn.(bool)
+	} else {
+		user.Authenticated = false
+	}
+
+	if username, ok := session.Values["name"]; ok {
+		user.Name = username.(string)
+	} else {
+		user.Name = "Anonymous"
+	}
+
+	if email, ok := session.Values["email"]; ok {
+		user.Email = email.(string)
+	} else {
+		user.Email = "anon@wiki.int"
+	}
+
+	return user
+}
+
 type AppContext struct {
 	SessionStore sessions.Store
 	Storage      *Storage
@@ -28,9 +57,10 @@ type AppContext struct {
 }
 
 type vRequest struct {
-	Ctx     *AppContext
-	Session *sessions.Session
-	Request *http.Request
+	Ctx      *AppContext
+	Session  *sessions.Session
+	Request  *http.Request
+	AuthUser *User
 }
 
 type vHandler interface {
@@ -53,9 +83,10 @@ func WithRequest(ac *AppContext, h vHandler) http.Handler {
 		session.Options = &sessionOpts
 
 		vreq := vRequest{
-			Ctx:     ac,
-			Session: session,
-			Request: r,
+			Ctx:      ac,
+			Session:  session,
+			Request:  r,
+			AuthUser: UserFromSession(session),
 		}
 		h.ServeHTTP(w, &vreq)
 	})
@@ -78,28 +109,10 @@ func (ac *AppContext) RenderTemplate(name string, context map[string]interface{}
 	buf.WriteTo(w)
 }
 
-func newTemplateContext(r *vRequest) map[string]interface{} {
-	tc := make(map[string]interface{})
-
-	if loggedIn, ok := r.Session.Values["logged_in"]; ok {
-		tc["session_logged_in"] = loggedIn.(bool)
-	} else {
-		tc["session_logged_in"] = false
-	}
-
-	if username, ok := r.Session.Values["name"]; ok {
-		tc["session_name"] = username.(string)
-	} else {
-		tc["session_name"] = ""
-	}
-
-	if email, ok := r.Session.Values["email"]; ok {
-		tc["session_email"] = email.(string)
-	} else {
-		tc["session_email"] = ""
-	}
-
-	return tc
+func newTemplateContext(r *vRequest) (tc map[string]interface{}) {
+	tc = make(map[string]interface{})
+	tc["user"] = r.AuthUser
+	return
 }
 
 // views
