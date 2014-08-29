@@ -65,6 +65,7 @@ func EditNewPage(page *Page, w http.ResponseWriter, r *vRequest) {
 	ctx["pageName"] = page.ShortName()
 	ctx["isNew"] = true
 	ctx["comment"] = ""
+	ctx["_xsrf"] = xsrftoken.Generate(r.Ctx.XsrfSecret, r.AuthUser.Name, "post")
 
 	r.Ctx.RenderTemplate("edit_page.html", ctx, w)
 }
