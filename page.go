@@ -125,6 +125,20 @@ func (page *Page) ShortName() string {
 	}
 }
 
+func (page *Page) GetMarkup() string {
+	if page.Header.Markup != "" {
+		return page.Header.Markup
+	}
+	ext := filepath.Ext(page.Path)
+	if ext == ".md" {
+		return "markdown"
+	} else if ext == ".rst" {
+		return "rst"
+	}
+
+	return ""
+}
+
 func (page *Page) Render() ([]byte, error) {
 	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
 		return renderRst(page.Content)
