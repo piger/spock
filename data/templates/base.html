@@ -7,13 +7,14 @@
     <title>spock wiki</title>
 
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/bootflat.min.css">
 
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
 
     <link rel="stylesheet" href="/static/css/app.css">
 
     <link rel="icon" href="/static/favicon.ico">
+
+    {{template "extrahead"}}
   </head>
 
   <body>
@@ -77,4 +78,7 @@
 </html>{{end}}
 
 {{define "js"}}
+{{end}}
+
+{{define "extrahead"}}
 {{end}}

@@ -39,6 +39,11 @@
 </div><!-- /container -->
 {{end}}
 
+{{define "extrahead"}}
+<script src="/static/ace-1.1.5-min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="/static/ace-1.1.5-min/ext-statusbar.js"></script>
+{{end}}
+
 {{define "js"}}
 <script>
  $(document).ready(function() {
@@ -46,20 +51,13 @@
      var u = window.location.href;
      window.location.href = u.replace("?edit=1", "");
    });
- });
-</script>
 
-<script src="/static/ace-1.1.5-min/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="/static/ace-1.1.5-min/ext-statusbar.js"></script>
-<script>
- $(document).ready(function() {
    var editor = ace.edit("editor");
    var StatusBar = ace.require("ace/ext/statusbar").StatusBar;
    var statusBar = new StatusBar(editor, document.getElementById("editor-statusbar"));
 
    editor.setTheme("ace/theme/tomorrow");
    editor.getSession().setMode("ace/mode/markdown");
-
 
    $("#editor-form").submit(function(event) {
      var session = editor.getSession();
