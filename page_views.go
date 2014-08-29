@@ -2,6 +2,7 @@ package spock
 
 import (
 	"code.google.com/p/xsrftoken"
+	"encoding/gob"
 	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
@@ -14,6 +15,50 @@ const (
 	ANONYMOUS_NAME  = "Anonymous"
 	ANONYMOUS_EMAIL = "anon@wiki.int"
 )
+
+type Breadcrumbs struct {
+	Pages []string
+}
+
+func (b *Breadcrumbs) Add(wikiPath string) {
+	if len := len(b.Pages); len > 0 {
+		last := b.Pages[len-1]
+		if last == wikiPath {
+			return
+		}
+	}
+
+	b.Pages = append(b.Pages, wikiPath)
+	numPages := len(b.Pages) - 5
+	if numPages < 0 {
+		numPages = 0
+	}
+	b.Pages = b.Pages[numPages:]
+}
+
+func init() {
+	gob.Register(&Breadcrumbs{})
+}
+
+func updateBreadcrumbs(w http.ResponseWriter, r *vRequest, page *Page) []string {
+	bcrumbs, ok := r.Session.Values["breadcrumbs"].(*Breadcrumbs)
+	if !ok {
+		bcrumbs = &Breadcrumbs{}
+		r.Session.Values["breadcrumbs"] = bcrumbs
+	}
+	bcrumbs.Add(page.ShortName())
+	r.Session.Save(r.Request, w)
+
+	return bcrumbs.Pages
+}
+
+func getBreadcrumbs(r *vRequest) []string {
+	if bcrumbs, ok := r.Session.Values["breadcrumbs"].(*Breadcrumbs); ok {
+		return bcrumbs.Pages
+	}
+
+	return make([]string, 0)
+}
 
 func getPagePath(r *vRequest) string {
 	vars := mux.Vars(r.Request)
@@ -46,6 +91,8 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	ctx["breadcrumbs"] = updateBreadcrumbs(w, r, page)
 
 	ctx["pageName"] = page.ShortName()
 	ctx["content"] = template.HTML(html)
@@ -203,6 +250,7 @@ func ListPages(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	ctx["pages"] = pages
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
 
 	r.Ctx.RenderTemplate("ls.html", ctx, w)
 }
