@@ -163,6 +163,7 @@ func renderMarkdown(content []byte) ([]byte, error) {
 	// Add TOC to the HTML output
 	htmlFlags := 0
 	htmlFlags |= blackfriday.HTML_TOC
+	htmlFlags |= blackfriday.HTML_FOOTNOTE_RETURN_LINKS
 
 	renderer := blackfriday.HtmlRenderer(htmlFlags, "", "")
 
