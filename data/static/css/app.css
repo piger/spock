@@ -32,8 +32,9 @@
   border-left: 1px solid;
 }
 
-#editor-form #content-area {
-  display: none;
+.CodeMirror {
+  border: 1px solid #ACACAC;
+  min-height: 400px;
 }
 
 #content nav {
