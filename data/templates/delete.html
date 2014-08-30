@@ -15,14 +15,9 @@
 
       {{template "pageBar" .pageName}}
 
-      <h2>Rename page</h2>
+      <h2>Delete page?</h2>
 
       <form action="" method="post" role="form">
-
-        <div class="form-group {{if .formError}}has-error{{end}}">
-          <input type="text" class="form-control" name="new-name" id="new-name" placeholder="new name">
-        </div>
-
         <div class="form-group">
           <textarea id="comment" class="form-control" name="comment" placeholder="optional comment"></textarea>
         </div>

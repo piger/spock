@@ -203,6 +203,7 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"results.html",
 		"diff.html",
 		"preview.html",
+		"delete.html",
 	}
 	baseTemplate := filepath.Join(DataDir, "templates", "base.html")
 	extraTemplate := filepath.Join(DataDir, "templates", "_extra.html")
@@ -234,12 +235,14 @@ func RunServer(address string, storage Storage, indexSrv string) error {
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
 	r.Handle("/search", WithRequest(ac, vHandlerFunc(SearchPages))).Name("search_pages")
 
-	r.Handle("/{pagepath:[a-zA-Z0-9_/.]+}", WithRequest(ac, vHandlerFunc(EditPage))).Queries("edit", "1").Name("edit_page")
-	r.Handle("/{pagepath:[a-zA-Z0-9_/.]+}", WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("log", "1").Name("show_log")
-	r.Handle("/{pagepath:[a-zA-Z0-9_/.]+}", WithRequest(ac, vHandlerFunc(RenamePage))).Queries("rename", "1").Name("rename_page")
-	r.Handle("/{pagepath:[a-zA-Z0-9_/.]+}", WithRequest(ac, vHandlerFunc(DiffPage))).Queries("diff", "{sha:[a-zA-Z0-9]{40}}").Name("diff_page")
+	pagePattern := "/{pagepath:[a-zA-Z0-9_/.]+}"
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(EditPage))).Queries("edit", "1").Name("edit_page")
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("log", "1").Name("show_log")
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("rename", "1").Name("rename_page")
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DeletePage))).Queries("delete", "1").Name("delete_page")
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("diff", "{sha:[a-zA-Z0-9]{40}}").Name("diff_page")
 
-	r.Handle("/{pagepath:[a-zA-Z0-9_/.]+}", WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
 	http.Handle("/", r)
 
 	log.Printf("Listening on: %s\n", address)

@@ -273,10 +273,17 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 	ctx := newTemplateContext(r)
 	ctx["pageName"] = page.ShortName()
 	ctx["breadcrumbs"] = getBreadcrumbs(r)
+	ctx["_xsrf"] = xsrftoken.Generate(r.Ctx.XsrfSecret, r.AuthUser.Name, "post")
 
 	if r.Request.Method == "POST" {
 		if err = r.Request.ParseForm(); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		xsrf := r.Request.PostFormValue("_xsrf")
+		if xsrfValid := xsrftoken.Valid(xsrf, r.Ctx.XsrfSecret, r.AuthUser.Name, "post"); !xsrfValid {
+			http.Error(w, "Invalid XSRF token", http.StatusBadRequest)
 			return
 		}
 
@@ -392,4 +399,57 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 	ctx["results"] = rv
 
 	r.Ctx.RenderTemplate("results.html", ctx, w)
+}
+
+func DeletePage(w http.ResponseWriter, r *vRequest) {
+	pagepath := getPagePath(r)
+	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !exists {
+		http.NotFound(w, r.Request)
+		return
+	}
+
+	if r.Request.Method == "POST" {
+		if err = r.Request.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		xsrf := r.Request.PostFormValue("_xsrf")
+		if xsrfValid := xsrftoken.Valid(xsrf, r.Ctx.XsrfSecret, r.AuthUser.Name, "post"); !xsrfValid {
+			http.Error(w, "Invalid XSRF token", http.StatusBadRequest)
+			return
+		}
+
+		comment := r.Request.PostFormValue("comment")
+		if comment == "" {
+			comment = fmt.Sprintf("deleted %s", page.ShortName())
+		}
+
+		fullname, email := LookupAuthor(r)
+		sig := &CommitSignature{
+			Name:  fullname,
+			Email: email,
+			When:  time.Now(),
+		}
+
+		_, _, err := (*r.Ctx.Storage).DeletePage(page.Path, sig, comment)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
+		return
+	}
+
+	ctx := newTemplateContext(r)
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
+	ctx["_xsrf"] = xsrftoken.Generate(r.Ctx.XsrfSecret, r.AuthUser.Name, "post")
+	ctx["pageName"] = page.ShortName()
+
+	r.Ctx.RenderTemplate("delete.html", ctx, w)
 }
