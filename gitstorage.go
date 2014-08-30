@@ -8,27 +8,30 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 )
-
-var baseGitIgnore string = `*~
-*.bak
-`
 
 type GitStorage struct {
 	WorkDir string
 	r       *git.Repository
 }
 
-func NewGitStorage(path string) (*GitStorage, error) {
-	gitstorage := &GitStorage{WorkDir: path}
+// Create a new git repository, initializing it.
+func CreateGitStorage(path string) (*GitStorage, error) {
+	repo, err := git.InitRepository(path, false)
+	if err != nil {
+		return nil, err
+	}
+
+	gitstorage := &GitStorage{WorkDir: path, r: repo}
 	return gitstorage, nil
 }
 
+// Open an existing git repository, optionally creating a new one if the
+// specified directory is not found and 'create' is true.
 func OpenGitStorage(path string, create bool) (*GitStorage, error) {
 	if _, err := os.Stat(path); err != nil {
 		if create {
-			return NewGitStorage(path)
+			return CreateGitStorage(path)
 		} else {
 			return nil, err
 		}
@@ -49,6 +52,7 @@ func (gs *GitStorage) MakeAbsPath(path string) string {
 	return filepath.Join(gs.WorkDir, path)
 }
 
+// Returns the last (root) commit and tree objects.
 func (gs *GitStorage) currentState() (commit *git.Commit, tree *git.Tree, err error) {
 	var head *git.Reference
 	head, err = gs.r.Head()
@@ -64,60 +68,16 @@ func (gs *GitStorage) currentState() (commit *git.Commit, tree *git.Tree, err er
 	return
 }
 
-func (gs *GitStorage) InitRepository() error {
-	repo, err := git.InitRepository(gs.WorkDir, false)
+// Returns true if the git repository has a "root commit" (i.e. the so called
+// initial commit).
+func (gs *GitStorage) hasRootCommit() bool {
+	refname := "refs/heads/master"
+	_, err := gs.r.LookupReference(refname)
 	if err != nil {
-		return err
+		return false
 	}
 
-	gs.r = repo
-	err = gs.seedEmptyRepo()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (gs *GitStorage) seedEmptyRepo() error {
-	// write file contents
-	gitIgnoreFile := filepath.Join(gs.WorkDir, ".gitignore")
-	if err := ioutil.WriteFile(gitIgnoreFile, []byte(baseGitIgnore), 0644); err != nil {
-		return err
-	}
-
-	sig := &git.Signature{
-		Name:  "Spock Wiki",
-		Email: "spock@localhost",
-		When:  time.Now(),
-	}
-
-	idx, err := gs.r.Index()
-	if err != nil {
-		return err
-	}
-	if err = idx.AddByPath(".gitignore"); err != nil {
-		return err
-	}
-	treeId, err := idx.WriteTree()
-	if err != nil {
-		return err
-	}
-	if err = idx.Write(); err != nil {
-		return err
-	}
-
-	message := "Add .gitignore file\n"
-	tree, err := gs.r.LookupTree(treeId)
-	if err != nil {
-		return err
-	}
-	_, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return true
 }
 
 func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
@@ -145,16 +105,23 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 		return
 	}
 
-	currentTip, _, err := gs.currentState()
-	if err != nil {
-		return
-	}
-
 	tree, err := gs.r.LookupTree(treeId)
 	if err != nil {
 		return
 	}
-	commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+
+	if gs.hasRootCommit() {
+		var currentTip *git.Commit
+
+		currentTip, _, err = gs.currentState()
+		if err != nil {
+			return
+		}
+
+		commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	} else {
+		commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree)
+	}
 	return
 }
 

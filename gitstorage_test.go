@@ -36,9 +36,7 @@ func createTestRepo(t *testing.T) *GitStorage {
 	path, err := ioutil.TempDir("", "spock")
 	checkFatal(t, err)
 
-	repo, err := NewGitStorage(path)
-	checkFatal(t, err)
-	err = repo.InitRepository()
+	repo, err := CreateGitStorage(path)
 	checkFatal(t, err)
 
 	return repo
@@ -76,7 +74,6 @@ func createSignature(t *testing.T) *CommitSignature {
 	}
 	return sig
 }
-
 
 // Tests
 func TestInitRepository(t *testing.T) {
@@ -182,7 +179,6 @@ func TestLogsForPage(t *testing.T) {
 		}
 	}
 }
-
 
 func TestGetLastCommit(t *testing.T) {
 	gs := createTestRepo(t)
