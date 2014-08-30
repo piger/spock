@@ -30,7 +30,7 @@
           <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .author_email}}?s=64" alt="{{.AuthorEmail}}">
         </a>
         <div class="media-body">
-          <h4 class="media-heading">{{.author_name}} on {{formatDatetime .modification_time "Mon Jan 2 15:04 2006"}}</h4>
+          <h4 class="media-heading"><span class="glyphicon glyphicon-comment"></span> {{.author_name}} on {{formatDatetime .modification_time "Mon Jan 2 15:04 2006"}}</h4>
           <pre>{{.last_commit}}</pre>
         </div>
       </div><!-- /.media -->

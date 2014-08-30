@@ -5,8 +5,16 @@
 
     <div class="col-md-12">
 
+      {{if .breadcrumbs}}
+      <ol class="breadcrumb">
+        {{range .breadcrumbs}}
+          <li><a href="/{{.}}">{{.}}</a></li>
+        {{end}}
+      </ol>
+      {{end}}
+
       {{template "pageBar" .pageName}}
-      
+
       <h2>Diff</h2>
 
       {{range .Diffs}}

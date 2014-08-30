@@ -34,12 +34,12 @@
 
 .CodeMirror {
   border: 1px solid #ACACAC;
-  min-height: 400px;
+  min-height: 500px;
 }
 
 #content nav {
   float: right;
-  width: 40%;
+  min-width: 30%;
   background: #eee;
   font-size: 0.9em;
   padding: 1em 2em;

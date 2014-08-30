@@ -1,8 +1,8 @@
 {{define "pageBar"}}
-<ul class="list-inline">
-  <li><a href="/{{.}}">/{{.}}</a></li>
-  <li><a href="?edit=1">edit</a></li>
-  <li><a href="?rename=1">rename</a></span></li>
-  <li><a href="?log=1">log</a></span></li>
-</ul>
+<div class="btn-group">
+  <a class="btn btn-xs btn-info" href="/{{.}}">/{{.}}</a>
+  <a class="btn btn-xs btn-default" href="?edit=1">edit</a>
+  <a class="btn btn-xs btn-default" href="?rename=1">rename</a></span>
+  <a class="btn btn-xs btn-default" href="?log=1">log</a></span>
+</div>
 {{end}}

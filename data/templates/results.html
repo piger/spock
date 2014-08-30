@@ -1,10 +1,18 @@
 {{define "content"}}
 
 <div class="container">
-  
+
   <div class="row">
-    
+
     <div class="col-md-12">
+
+      {{if .breadcrumbs}}
+      <ol class="breadcrumb">
+        {{range .breadcrumbs}}
+          <li><a href="/{{.}}">{{.}}</a></li>
+        {{end}}
+      </ol>
+      {{end}}
 
       <h2>Results</h2>
 
@@ -16,10 +24,10 @@
         <p>Title: <a href="/{{.Title}}">{{.Title}}</a></p>
         <pre>{{.Highlight}}</pre>
       {{end}}
-        
+
     </div><!-- /.col -->
-    
+
   </div><!-- /.row -->
-  
+
 </div><!-- /.container -->
 {{end}}

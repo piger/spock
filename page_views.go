@@ -174,6 +174,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 	ctx["isNew"] = false
 	ctx["comment"] = ""
 	ctx["_xsrf"] = xsrftoken.Generate(r.Ctx.XsrfSecret, r.AuthUser.Name, "post")
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
 
 	r.Ctx.RenderTemplate("edit_page.html", ctx, w)
 }
@@ -226,6 +227,8 @@ func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	ctx["pageName"] = page.ShortName()
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
+
 	var details []map[string]interface{}
 
 	for _, commitlog := range commits {
@@ -269,6 +272,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 	var formError bool
 	ctx := newTemplateContext(r)
 	ctx["pageName"] = page.ShortName()
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
 
 	if r.Request.Method == "POST" {
 		if err = r.Request.ParseForm(); err != nil {
@@ -331,6 +335,8 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	ctx["Diffs"] = diffs
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
+	ctx["pageName"] = page.ShortName()
 
 	r.Ctx.RenderTemplate("diff.html", ctx, w)
 }
@@ -374,6 +380,7 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 	}
 
 	ctx := newTemplateContext(r)
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
 	ctx["SearchQuery"] = query
 	ctx["Suggestion"] = result.Suggestion
 
