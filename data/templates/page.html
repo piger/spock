@@ -12,7 +12,9 @@
       </ol>
       {{end}}
 
-      {{template "pageBar" .pageName}}
+      {{template "alerts" .alerts}}
+      
+      {{template "pageBar" .page.ShortName}}
 
       <div id="content">{{.content}}</div>
     </div>
@@ -26,12 +28,12 @@
 
     <div class="col-md-12">
       <div class="media">
-        <a class="pull-left" href="mailto:{{.author_email}}">
-          <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .author_email}}?s=64" alt="{{.AuthorEmail}}">
+        <a class="pull-left" href="mailto:{{.lastlog.Email}}">
+          <img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .lastlog.Email}}?s=64" alt="{{.lastlog.Email}}">
         </a>
         <div class="media-body">
-          <h4 class="media-heading"><span class="glyphicon glyphicon-comment"></span> {{.author_name}} on {{formatDatetime .modification_time "Mon Jan 2 15:04 2006"}}</h4>
-          <pre>{{.last_commit}}</pre>
+          <h4 class="media-heading"><span class="glyphicon glyphicon-comment"></span> {{.lastlog.Name}} on {{formatDatetime .lastlog.When "Mon Jan 2 15:04 2006"}}</h4>
+          <pre>{{.lastlog.Message}}</pre>
         </div>
       </div><!-- /.media -->
 

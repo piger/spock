@@ -103,14 +103,11 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 	}
 
 	ctx["breadcrumbs"] = updateBreadcrumbs(w, r, page)
-
-	ctx["pageName"] = page.ShortName()
+	ctx["page"] = page
 	ctx["content"] = template.HTML(html)
-	ctx["author_email"] = lastlog.Email
-	ctx["author_name"] = lastlog.Name
-	ctx["modification_time"] = lastlog.When
-	ctx["last_commit"] = lastlog.Message
+	ctx["lastlog"] = lastlog
 	ctx["render_time"] = time.Since(renderStart)
+	ctx["alerts"] = GetAlerts(r, w)
 
 	r.Ctx.RenderTemplate("page.html", ctx, w)
 }

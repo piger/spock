@@ -7,3 +7,9 @@
   <a class="btn btn-xs btn-warning" href="?delete=1">delete</a></span>
 </div>
 {{end}}
+
+{{define "alerts"}}
+{{range .}}
+  <div class="alert alert-{{.Level}}">{{.Message}}</div>
+{{end}}
+{{end}}
