@@ -92,7 +92,15 @@ func WithRequest(ac *AppContext, h vHandler) http.Handler {
 	})
 }
 
-func (ac *AppContext) RenderTemplate(name string, context map[string]interface{}, w http.ResponseWriter) {
+type TemplateContext map[string]interface{}
+
+func newTemplateContext(r *vRequest) TemplateContext {
+	tc := make(map[string]interface{})
+	tc["user"] = r.AuthUser
+	return tc
+}
+
+func (ac *AppContext) RenderTemplate(name string, context TemplateContext, w http.ResponseWriter) {
 	var buf bytes.Buffer
 	t, ok := ac.Templates[name]
 	if !ok {
