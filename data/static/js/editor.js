@@ -8,7 +8,7 @@ CodeMirror.defineMode("wikiEditor", function(config) {
 
     return CodeMirror.multiplexingMode(
         CodeMirror.getMode(config, mode),
-        {open: "---\n", close: "---\n",
+        {open: /^---$/, close: /^---$/,
          mode: CodeMirror.getMode(config, "yaml"),
          delimStyle: "delimit"}
     );
