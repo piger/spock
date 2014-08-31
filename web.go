@@ -3,6 +3,7 @@ package spock
 
 import (
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -23,6 +24,15 @@ type User struct {
 	Authenticated bool
 	Name          string
 	Email         string
+}
+
+type Alert struct {
+	Level   string
+	Message string
+}
+
+func init() {
+	gob.Register(&Alert{})
 }
 
 func UserFromSession(session *sessions.Session) *User {
@@ -117,10 +127,22 @@ func (ac *AppContext) RenderTemplate(name string, context TemplateContext, w htt
 	buf.WriteTo(w)
 }
 
-func newTemplateContext(r *vRequest) (tc map[string]interface{}) {
-	tc = make(map[string]interface{})
-	tc["user"] = r.AuthUser
-	return
+// Return a slice of session Alerts; note: will save the current session.
+func GetAlerts(r *vRequest, w http.ResponseWriter) []*Alert {
+	var alerts []*Alert
+
+	if flashes := r.Session.Flashes(); len(flashes) > 0 {
+		for _, flash := range flashes {
+			alerts = append(alerts, flash.(*Alert))
+		}
+	}
+	r.Session.Save(r.Request, w)
+
+	return alerts
+}
+
+func AddAlert(message, level string, r *vRequest) {
+	r.Session.AddFlash(&Alert{Level: level, Message: message})
 }
 
 // views
