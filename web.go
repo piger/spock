@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"sync"
 )
 
 var (
@@ -31,8 +32,38 @@ type Alert struct {
 	Message string
 }
 
+type pageCache struct {
+	lock        sync.RWMutex
+	PageRenders map[string][]byte
+}
+
+func (pc *pageCache) Get(path string) ([]byte, bool) {
+	pc.lock.RLock()
+	defer pc.lock.RUnlock()
+
+	page, ok := pc.PageRenders[path]
+	return page, ok
+}
+
+func (pc *pageCache) Set(path string, html []byte) {
+	pc.lock.RLock()
+	defer pc.lock.RUnlock()
+
+	pc.PageRenders[path] = html
+}
+
+func (pc *pageCache) Flush(path string) {
+	pc.lock.RLock()
+	defer pc.lock.RUnlock()
+
+	delete(pc.PageRenders, path)
+}
+
+var PageCache *pageCache
+
 func init() {
 	gob.Register(&Alert{})
+	PageCache = &pageCache{PageRenders: make(map[string][]byte)}
 }
 
 func UserFromSession(session *sessions.Session) *User {

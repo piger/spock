@@ -140,10 +140,20 @@ func (page *Page) GetMarkup() string {
 }
 
 func (page *Page) Render() ([]byte, error) {
+	// if cache, ok := PageCache.Get(page.Path); ok {
+	// 	return cache, nil
+	// }
+
+	var html []byte
+	var err error
 	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
-		return renderRst(page.Content)
+		html, err = renderRst(page.Content)
+		// PageCache.Set(page.Path, html)
+		return html, err
 	} else if page.Header.Markup == "markdown" || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
-		return renderMarkdown(page.Content)
+		html, err = renderMarkdown(page.Content)
+		// PageCache.Set(page.Path, html)
+		return html, err
 	}
 
 	return []byte(page.Content), errors.New("Unknown format")
