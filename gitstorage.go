@@ -385,8 +385,7 @@ func (gs *GitStorage) GetLastCommit(path string) (*CommitLog, error) {
 func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string) error {
 	fullpath := filepath.Join(gs.WorkDir, page.Path)
 
-	err := MkMissingDirs(fullpath)
-	if err != nil {
+	if err := MkMissingDirs(fullpath); err != nil {
 		return err
 	}
 
@@ -394,7 +393,7 @@ func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string)
 		return err
 	}
 
-	_, _, err = gs.CommitFile(page.Path, sig, message)
+	_, _, err := gs.CommitFile(page.Path, sig, message)
 	return err
 }
 
