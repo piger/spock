@@ -8,6 +8,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"runtime"
+	"strings"
 	"time"
 )
 
@@ -63,6 +65,14 @@ func getBreadcrumbs(r *vRequest) []string {
 func getPagePath(r *vRequest) string {
 	vars := mux.Vars(r.Request)
 	return vars["pagepath"]
+}
+
+// Convert CRLF if the platform is not Windows.
+func convertNewlines(text string) string {
+	if runtime.GOOS == "windows" {
+		return text
+	}
+	return strings.Replace(text, "\r\n", "\n", -1)
 }
 
 func ShowPage(w http.ResponseWriter, r *vRequest) {
@@ -137,8 +147,8 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			return
 		}
 
-		content := r.Request.PostFormValue("content")
-		comment := r.Request.PostFormValue("comment")
+		content := convertNewlines(r.Request.PostFormValue("content"))
+		comment := convertNewlines(r.Request.PostFormValue("comment"))
 		doPreview := r.Request.PostFormValue("preview")
 
 		if doPreview != "" {
@@ -288,7 +298,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 		}
 
 		newname := r.Request.PostFormValue("new-name")
-		comment := r.Request.PostFormValue("comment")
+		comment := convertNewlines(r.Request.PostFormValue("comment"))
 		if newname == "" {
 			formError = true
 		}
@@ -424,7 +434,7 @@ func DeletePage(w http.ResponseWriter, r *vRequest) {
 			return
 		}
 
-		comment := r.Request.PostFormValue("comment")
+		comment := convertNewlines(r.Request.PostFormValue("comment"))
 		if comment == "" {
 			comment = fmt.Sprintf("deleted %s", page.ShortName())
 		}
