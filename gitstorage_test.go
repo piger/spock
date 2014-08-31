@@ -58,7 +58,7 @@ func createTestPage(t *testing.T, gs *GitStorage, path, content, authorName, aut
 	pagePath := filepath.Join(gs.WorkDir, path)
 	checkFatal(t, ioutil.WriteFile(pagePath, []byte(content), 0644))
 	sig := &CommitSignature{Name: authorName, Email: authorEmail, When: when}
-	_, _, err := gs.CommitFile(path, sig, message)
+	_, err := gs.CommitFile(path, sig, message)
 	checkFatal(t, err)
 
 	return path
@@ -86,7 +86,7 @@ func TestCommitFile(t *testing.T) {
 	defer cleanup(t, gs)
 
 	pageName := createIndexPage(t, gs)
-	_, _, err := gs.CommitFile(pageName, createSignature(t), "import index.md")
+	_, err := gs.CommitFile(pageName, createSignature(t), "import index.md")
 	checkFatal(t, err)
 }
 
@@ -96,12 +96,12 @@ func TestRenamePage(t *testing.T) {
 
 	pageName := createIndexPage(t, gs)
 	sig := createSignature(t)
-	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
+	_, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
 
 	newPageName := "foobar.md"
 	message := "Renamed index.md to foobar.md"
-	_, _, err = gs.RenamePage(pageName, newPageName, sig, message)
+	_, err = gs.RenamePage(pageName, newPageName, sig, message)
 	checkFatal(t, err)
 
 	pagePath := filepath.Join(gs.WorkDir, newPageName)
@@ -128,10 +128,10 @@ func TestDeletePage(t *testing.T) {
 	pageName := createIndexPage(t, gs)
 	sig := createSignature(t)
 
-	_, _, err := gs.CommitFile(pageName, sig, "import index.md")
+	_, err := gs.CommitFile(pageName, sig, "import index.md")
 	checkFatal(t, err)
 
-	_, _, err = gs.DeletePage(pageName, sig, "get rid of index.md")
+	_, err = gs.DeletePage(pageName, sig, "get rid of index.md")
 	checkFatal(t, err)
 
 	pagePath := filepath.Join(gs.WorkDir, pageName)
@@ -151,13 +151,13 @@ func TestLogsForPage(t *testing.T) {
 		"import index.md",
 		"modify index.md for fun",
 	}
-	_, _, err := gs.CommitFile(pageName, sig, messages[0])
+	_, err := gs.CommitFile(pageName, sig, messages[0])
 	checkFatal(t, err)
 
 	pagePath := filepath.Join(gs.WorkDir, pageName)
 	checkFatal(t, ioutil.WriteFile(pagePath, []byte("foo bar baz"), 0644))
 	sig2 := &CommitSignature{Name: "Another Test User", Email: "a_test@example.com", When: time.Now()}
-	_, _, err = gs.CommitFile(pageName, sig2, messages[1])
+	_, err = gs.CommitFile(pageName, sig2, messages[1])
 	checkFatal(t, err)
 
 	logs, err := gs.LogsForPage(pageName)
@@ -188,7 +188,7 @@ func TestGetLastCommit(t *testing.T) {
 
 	sig := &CommitSignature{Name: "Test User", Email: "test@example.com", When: time.Now()}
 	msg := "import index.md"
-	_, _, err := gs.CommitFile(pageName, sig, msg)
+	_, err := gs.CommitFile(pageName, sig, msg)
 	checkFatal(t, err)
 
 	lastcommit, err := gs.GetLastCommit(pageName)

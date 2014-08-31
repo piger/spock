@@ -316,7 +316,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 
 		// Rename the page here!
 		if !formError {
-			_, _, err = r.Ctx.Storage.RenamePage(page.Path, newname, sig, comment)
+			_, err = r.Ctx.Storage.RenamePage(page.Path, newname, sig, comment)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -446,7 +446,7 @@ func DeletePage(w http.ResponseWriter, r *vRequest) {
 			When:  time.Now(),
 		}
 
-		_, _, err := r.Ctx.Storage.DeletePage(page.Path, sig, comment)
+		_, err := r.Ctx.Storage.DeletePage(page.Path, sig, comment)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

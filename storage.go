@@ -1,7 +1,6 @@
 package spock
 
 import (
-	"github.com/piger/git2go"
 	"time"
 )
 
@@ -10,9 +9,9 @@ var PAGE_EXTENSIONS = []string{"md", "rst", "txt"}
 
 // This is the interface to the version control system used as a backend.
 type Storage interface {
-	CommitFile(path string, signature *CommitSignature, message string) (*git.Oid, *git.Oid, error)
-	RenamePage(origPath, destPath string, signature *CommitSignature, message string) (*git.Oid, *git.Oid, error)
-	DeletePage(path string, signature *CommitSignature, message string) (*git.Oid, *git.Oid, error)
+	CommitFile(path string, signature *CommitSignature, message string) (RevId, error)
+	RenamePage(origPath, destPath string, signature *CommitSignature, message string) (RevId, error)
+	DeletePage(path string, signature *CommitSignature, message string) (RevId, error)
 	LogsForPage(path string) ([]CommitLog, error)
 	LookupPage(pagepath string) (*Page, bool, error)
 	GetLastCommit(path string) (*CommitLog, error)
@@ -36,3 +35,5 @@ type CommitSignature struct {
 	Email string
 	When  time.Time
 }
+
+type RevId string

@@ -80,7 +80,7 @@ func (gs *GitStorage) hasRootCommit() bool {
 	return true
 }
 
-func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
+func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (revId RevId, err error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
@@ -95,7 +95,7 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 	if err = idx.AddByPath(path); err != nil {
 		return
 	}
-	treeId, err = idx.WriteTree()
+	treeId, err := idx.WriteTree()
 	if err != nil {
 		return
 	}
@@ -110,6 +110,7 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 		return
 	}
 
+	var commitId *git.Oid
 	if gs.hasRootCommit() {
 		var currentTip *git.Commit
 
@@ -122,10 +123,15 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 	} else {
 		commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree)
 	}
+	if err != nil {
+		return
+	}
+
+	revId = RevId(commitId.String())
 	return
 }
 
-func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
+func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (revId RevId, err error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
@@ -151,7 +157,7 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 	if err = idx.RemoveByPath(origPath); err != nil {
 		return
 	}
-	treeId, err = idx.WriteTree()
+	treeId, err := idx.WriteTree()
 	if err != nil {
 		return
 	}
@@ -170,11 +176,16 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 	if err != nil {
 		return
 	}
-	commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	commitId, err := gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	if err != nil {
+		return
+	}
+
+	revId = RevId(commitId.String())
 	return
 }
 
-func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, message string) (commitId *git.Oid, treeId *git.Oid, err error) {
+func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, message string) (revId RevId, err error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
@@ -193,7 +204,7 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 	if err = idx.RemoveByPath(path); err != nil {
 		return
 	}
-	treeId, err = idx.WriteTree()
+	treeId, err := idx.WriteTree()
 	if err != nil {
 		return
 	}
@@ -212,7 +223,11 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 	if err != nil {
 		return
 	}
-	commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	commitId, err := gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	if err != nil {
+		return
+	}
+	revId = RevId(commitId.String())
 
 	return
 }
@@ -393,7 +408,7 @@ func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string)
 		return err
 	}
 
-	_, _, err := gs.CommitFile(page.Path, sig, message)
+	_, err := gs.CommitFile(page.Path, sig, message)
 	return err
 }
 
