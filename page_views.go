@@ -170,6 +170,12 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			return
 		}
 
+		// index the page
+		if err = r.Ctx.IndexDocument(page.Path); err != nil {
+			AddAlert(fmt.Sprintf("Cannot index document %s: %s\n", page.Path, err), "warning", r)
+			r.Session.Save(r.Request, w)
+		}
+
 		http.Redirect(w, r.Request, "/"+page.ShortName(), http.StatusSeeOther)
 		return
 	}
