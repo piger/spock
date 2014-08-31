@@ -50,7 +50,7 @@ func UserFromSession(session *sessions.Session) *User {
 
 type AppContext struct {
 	SessionStore sessions.Store
-	Storage      *Storage
+	Storage      Storage
 	Templates    map[string]*template.Template
 	XsrfSecret   string
 	IndexSrv     string
@@ -220,7 +220,7 @@ func RunServer(address string, storage Storage, indexSrv string) error {
 	ac := &AppContext{
 		SessionStore: sessions.NewCookieStore([]byte("lalala")),
 		XsrfSecret:   "lalala",
-		Storage:      &storage,
+		Storage:      storage,
 		Templates:    loadTemplates(r),
 		IndexSrv:     indexSrv,
 	}

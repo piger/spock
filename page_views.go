@@ -71,7 +71,7 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 	renderStart := time.Now()
 
 	pagepath := getPagePath(r)
-	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,7 +86,7 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	lastlog, err := (*r.Ctx.Storage).GetLastCommit(page.Path)
+	lastlog, err := r.Ctx.Storage.GetLastCommit(page.Path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -119,7 +119,7 @@ func EditNewPage(page *Page, w http.ResponseWriter, r *vRequest) {
 
 func EditPage(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, _, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	page, _, err := r.Ctx.Storage.LookupPage(pagepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -157,7 +157,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			Email: email,
 			When:  time.Now(),
 		}
-		err := (*r.Ctx.Storage).SavePage(page, sig, comment)
+		err := r.Ctx.Storage.SavePage(page, sig, comment)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -210,7 +210,7 @@ func ShowPreview(page *Page, content string, w http.ResponseWriter, r *vRequest)
 
 func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -219,7 +219,7 @@ func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	commits, err := (*r.Ctx.Storage).LogsForPage(page.Path)
+	commits, err := r.Ctx.Storage.LogsForPage(page.Path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -245,7 +245,7 @@ func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 }
 
 func ListPages(w http.ResponseWriter, r *vRequest) {
-	pages, err := (*r.Ctx.Storage).ListPages()
+	pages, err := r.Ctx.Storage.ListPages()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -260,7 +260,7 @@ func ListPages(w http.ResponseWriter, r *vRequest) {
 
 func RenamePage(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -306,7 +306,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 
 		// Rename the page here!
 		if !formError {
-			_, _, err = (*r.Ctx.Storage).RenamePage(page.Path, newname, sig, comment)
+			_, _, err = r.Ctx.Storage.RenamePage(page.Path, newname, sig, comment)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -323,7 +323,7 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 
 func DiffPage(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -334,7 +334,7 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 
 	vars := mux.Vars(r.Request)
 	shaParam := vars["sha"]
-	diffs, err := (*r.Ctx.Storage).DiffPage(page, shaParam)
+	diffs, err := r.Ctx.Storage.DiffPage(page, shaParam)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -403,7 +403,7 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 
 func DeletePage(w http.ResponseWriter, r *vRequest) {
 	pagepath := getPagePath(r)
-	page, exists, err := (*r.Ctx.Storage).LookupPage(pagepath)
+	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -436,7 +436,7 @@ func DeletePage(w http.ResponseWriter, r *vRequest) {
 			When:  time.Now(),
 		}
 
-		_, _, err := (*r.Ctx.Storage).DeletePage(page.Path, sig, comment)
+		_, _, err := r.Ctx.Storage.DeletePage(page.Path, sig, comment)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
