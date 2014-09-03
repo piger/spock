@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/xsrftoken"
 	"encoding/gob"
 	"fmt"
+	"github.com/blevesearch/bleve"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -172,8 +173,18 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 		// index the page
 		if err = r.Ctx.IndexDocument(page.Path); err != nil {
-			AddAlert(fmt.Sprintf("Cannot index document %s: %s\n", page.Path, err), "warning", r)
+			AddAlert(fmt.Sprintf("whoosh: Cannot index document %s: %s\n", page.Path, err), "warning", r)
 			r.Session.Save(r.Request, w)
+		}
+
+		wikiPage, err := page.ToWikiPage()
+		if err == nil {
+			if err = r.Ctx.Index.AddPage(page.ShortName(), wikiPage); err != nil {
+				AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
+				r.Session.Save(r.Request, w)
+			}
+		} else {
+			log.Print(err)
 		}
 
 		http.Redirect(w, r.Request, "/"+page.ShortName(), http.StatusSeeOther)
@@ -397,6 +408,17 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 		log.Printf("Search error: %s\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// test new search
+	altQ := bleve.NewMatchQuery(query)
+	altS := bleve.NewSearchRequest(altQ)
+	altS.Highlight = bleve.NewHighlight()
+	altR, err := r.Ctx.Index.index.Search(altS)
+	if err != nil {
+		log.Printf("Error in bleve search: %s\n", err)
+	} else {
+		log.Printf("Bleve results: %+v\n", altR)
 	}
 
 	ctx := newTemplateContext(r)

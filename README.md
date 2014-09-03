@@ -33,6 +33,7 @@ Requirements:
 - Python 2.6+ (2.7 is better)
   - [docutils](docutils) (for `rst` rendering)
 - a C compiler
+- icu4c
 
 ### Building Spock
 

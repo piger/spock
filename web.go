@@ -95,6 +95,7 @@ type AppContext struct {
 	Templates    map[string]*template.Template
 	XsrfSecret   string
 	IndexSrv     string
+	Index        Index
 }
 
 type vRequest struct {
@@ -275,7 +276,7 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 	return templates
 }
 
-func RunServer(address string, storage Storage, indexSrv string) error {
+func RunServer(address string, storage Storage, indexSrv string, index *Index) error {
 	r := mux.NewRouter()
 
 	ac := &AppContext{
@@ -284,6 +285,7 @@ func RunServer(address string, storage Storage, indexSrv string) error {
 		Storage:      storage,
 		Templates:    loadTemplates(r),
 		IndexSrv:     indexSrv,
+		Index:        *index,
 	}
 
 	http.Handle(staticPrefix,
