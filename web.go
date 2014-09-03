@@ -178,7 +178,7 @@ func AddAlert(message, level string, r *vRequest) {
 
 // views
 
-func Index(w http.ResponseWriter, r *vRequest) {
+func IndexRedirect(w http.ResponseWriter, r *vRequest) {
 	http.Redirect(w, r.Request, "/index", http.StatusFound)
 }
 
@@ -290,7 +290,7 @@ func RunServer(address string, storage Storage, indexSrv string) error {
 		http.StripPrefix(staticPrefix,
 			http.FileServer(http.Dir(filepath.Join(DataDir, "static")))))
 
-	r.Handle("/", WithRequest(ac, vHandlerFunc(Index))).Name("index")
+	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexRedirect))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
 	r.Handle("/logout", WithRequest(ac, vHandlerFunc(Logout))).Name("logout")
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
