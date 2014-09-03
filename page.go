@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/mschoch/blackfriday-text"
 	"github.com/russross/blackfriday"
 	"gopkg.in/yaml.v1"
 	"io/ioutil"
@@ -157,6 +158,17 @@ func (page *Page) Render() ([]byte, error) {
 	}
 
 	return []byte(page.Content), errors.New("Unknown format")
+}
+
+func (page *Page) RenderPlaintext() ([]byte, error) {
+	if page.GetMarkup() == "markdown" {
+		extensions := 0
+		renderer := blackfridaytext.TextRenderer()
+		output := blackfriday.Markdown(page.RawBytes, renderer, extensions)
+		return output, nil
+	}
+
+	return page.RawBytes, nil
 }
 
 func (page *Page) RenderContent(content string) ([]byte, error) {
