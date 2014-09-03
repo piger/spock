@@ -1,5 +1,8 @@
-spock
-env/
-*.pyc
 *~
+*.pyc
+spock
+spock.test
+env/
 *.egg-info/
+*.bleve
+data/static/codemirror-4.5/
