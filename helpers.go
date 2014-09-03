@@ -2,7 +2,7 @@ package spock
 
 import (
 	"crypto/md5"
-	"encoding/hex"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -15,7 +15,6 @@ func formatDatetime(t time.Time, layout string) string {
 // Return md5 checksum of an email address that can be used to lookup a gravatar
 // icon.
 func gravatarHash(email string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(strings.ToLower(email)))
-	return hex.EncodeToString(hasher.Sum(nil))
+	input := strings.ToLower(strings.TrimSpace(email))
+	return fmt.Sprintf("%x", md5.Sum([]byte(input)))
 }
