@@ -164,7 +164,7 @@ func (page *Page) RenderPlaintext() ([]byte, error) {
 	if page.GetMarkup() == "markdown" {
 		extensions := 0
 		renderer := blackfridaytext.TextRenderer()
-		output := blackfriday.Markdown(page.RawBytes, renderer, extensions)
+		output := blackfriday.Markdown(page.Content, renderer, extensions)
 		return output, nil
 	}
 
