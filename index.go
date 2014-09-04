@@ -59,8 +59,16 @@ func OpenIndex(path string) (*Index, error) {
 	return &Index{index: index, path: path}, nil
 }
 
-func (idx *Index) AddPage(path string, wikiPage *WikiPage) error {
-	return idx.index.Index(path, wikiPage)
+func (idx *Index) AddPage(page *Page) error {
+	wikiPage, err := page.ToWikiPage()
+	if err != nil {
+		return err
+	}
+	return idx.index.Index(page.ShortName(), wikiPage)
+}
+
+func (idx *Index) DeletePage(page *Page) error {
+	return idx.index.Delete(page.ShortName())
 }
 
 func (idx *Index) Close() {

@@ -177,14 +177,9 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			r.Session.Save(r.Request, w)
 		}
 
-		wikiPage, err := page.ToWikiPage()
-		if err == nil {
-			if err = r.Ctx.Index.AddPage(page.ShortName(), wikiPage); err != nil {
-				AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
-				r.Session.Save(r.Request, w)
-			}
-		} else {
-			log.Print(err)
+		if err = r.Ctx.Index.AddPage(page); err != nil {
+			AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
+			r.Session.Save(r.Request, w)
 		}
 
 		http.Redirect(w, r.Request, "/"+page.ShortName(), http.StatusSeeOther)
