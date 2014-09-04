@@ -80,7 +80,7 @@ func (gs *GitStorage) hasRootCommit() bool {
 	return true
 }
 
-func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (revId RevId, err error) {
+func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (revId RevID, err error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
@@ -127,11 +127,11 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 		return
 	}
 
-	revId = RevId(commitId.String())
+	revId = RevID(commitId.String())
 	return
 }
 
-func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (revId RevId, err error) {
+func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (revId RevID, err error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
@@ -181,11 +181,11 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 		return
 	}
 
-	revId = RevId(commitId.String())
+	revId = RevID(commitId.String())
 	return
 }
 
-func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, message string) (revId RevId, err error) {
+func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, message string) (revId RevID, err error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
@@ -227,7 +227,7 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 	if err != nil {
 		return
 	}
-	revId = RevId(commitId.String())
+	revId = RevID(commitId.String())
 
 	return
 }

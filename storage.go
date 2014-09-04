@@ -9,14 +9,27 @@ var PAGE_EXTENSIONS = []string{"md", "rst", "txt"}
 
 // This is the interface to the version control system used as a backend.
 type Storage interface {
-	CommitFile(path string, signature *CommitSignature, message string) (RevId, error)
-	RenamePage(origPath, destPath string, signature *CommitSignature, message string) (RevId, error)
-	DeletePage(path string, signature *CommitSignature, message string) (RevId, error)
-	LogsForPage(path string) ([]CommitLog, error)
+	// Lookup a single Page
 	LookupPage(pagepath string) (*Page, bool, error)
-	GetLastCommit(path string) (*CommitLog, error)
+
+	// Save the changes in a Page content. XXX deprecated?
+	CommitFile(path string, signature *CommitSignature, message string) (RevID, error)
+
+	// CRUD
+	RenamePage(origPath, destPath string, signature *CommitSignature, message string) (RevID, error)
+	DeletePage(path string, signature *CommitSignature, message string) (RevID, error)
 	SavePage(page *Page, sig *CommitSignature, message string) error
+
+	// Get the commit logs for a Page.
+	LogsForPage(path string) ([]CommitLog, error)
+
+	// Get the last commit for a single Page. (deprecate?)
+	GetLastCommit(path string) (*CommitLog, error)
+
+	// List all the pages inside this Storage.
 	ListPages() ([]string, error)
+
+	// Returns a diff between the current page content and another revision. (rewrite?)
 	DiffPage(page *Page, otherSha string) ([]string, error)
 }
 
@@ -29,11 +42,11 @@ type CommitLog struct {
 	When    time.Time
 }
 
-// The signature for a new commit.
 type CommitSignature struct {
 	Name  string
 	Email string
 	When  time.Time
 }
 
-type RevId string
+// RevID represents a revision id; with git is the SHA hash of a commit.
+type RevID string

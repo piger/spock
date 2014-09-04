@@ -1,8 +1,8 @@
 package spock
 
 import (
-	"path/filepath"
 	"os"
+	"path/filepath"
 )
 
 // MkMissingDirs creates parent directories for the specified 'filename'.
