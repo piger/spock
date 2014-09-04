@@ -83,7 +83,7 @@ Now you can build Spock:
 go get -d github.com/piger/spock
 cd $GOPATH/src/github.com/piger/spock
 # On GNU/Linux:
-go build -tags "libstemmer icu" cmd/spock/spock.go
+go build -tags "libstemmer icu leveldb" cmd/spock/spock.go
 # On OS X:
 ./build-osx.sh
 ```

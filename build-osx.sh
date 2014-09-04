@@ -9,4 +9,4 @@ CGO_CFLAGS="-I${LIBICU}/include"
 DYLD_LIBRARY_PATH="${LIBICU}/lib"
 export CGO_LDFLAGS CGO_CFLAGS
 
-go build -tags "libstemmer icu" cmd/spock/spock.go
+go build -tags "libstemmer icu leveldb" cmd/spock/spock.go
