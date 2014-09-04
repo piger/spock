@@ -5,13 +5,12 @@ import (
 	"log"
 )
 
-const textAnalyzer = "simple"
+const textAnalyzer = "standard"
 const textEnAnalyzer = "en"
 const textItAnalyzer = "it"
 
 type WikiPage struct {
 	Title  string `json:"title"`
-	Body   string `json:"body"`
 	BodyEn string `json:"body_en"`
 	BodyIt string `json:"body_it"`
 }
@@ -22,26 +21,26 @@ type Index struct {
 }
 
 func buildIndexMapping() *bleve.IndexMapping {
-	titleMapping := bleve.NewDocumentMapping().
-		AddFieldMapping(
-		bleve.NewFieldMapping("", "text", textAnalyzer, true, true, true, true))
 
-	bodyEnMapping := bleve.NewDocumentMapping().
-		AddFieldMapping(
-		bleve.NewFieldMapping("", "text", textEnAnalyzer, true, true, true, true))
+	enTextMapping := bleve.NewTextFieldMapping()
+	enTextMapping.Analyzer = textEnAnalyzer
 
-	bodyItMapping := bleve.NewDocumentMapping().
-		AddFieldMapping(
-		bleve.NewFieldMapping("", "text", textItAnalyzer, true, true, true, true))
+	itTextMapping := bleve.NewTextFieldMapping()
+	itTextMapping.Analyzer = textItAnalyzer
 
-	wikiPageMapping := bleve.NewDocumentMapping().
-		AddSubDocumentMapping("title", titleMapping).
-		AddSubDocumentMapping("body_en", bodyEnMapping).
-		AddSubDocumentMapping("body_it", bodyItMapping)
+	stdTextMapping := bleve.NewTextFieldMapping()
+	stdTextMapping.Analyzer = textAnalyzer
 
-	indexMapping := bleve.NewIndexMapping().AddDocumentMapping("page", wikiPageMapping)
-	indexMapping.DefaultAnalyzer = textEnAnalyzer
-	return indexMapping
+	wikiPageMapping := bleve.NewDocumentMapping()
+	wikiPageMapping.AddFieldMappingsAt("title", stdTextMapping)
+	wikiPageMapping.AddSubDocumentMapping("id", bleve.NewDocumentDisabledMapping())
+	wikiPageMapping.AddFieldMappingsAt("body_en", enTextMapping)
+	wikiPageMapping.AddFieldMappingsAt("body_it", itTextMapping)
+
+	mapping := bleve.NewIndexMapping()
+	mapping.AddDocumentMapping("wikiPage", wikiPageMapping)
+
+	return mapping
 }
 
 func OpenIndex(path string) (*Index, error) {
