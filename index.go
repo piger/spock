@@ -67,6 +67,42 @@ func (idx *Index) Close() {
 	idx.index.Close()
 }
 
+func (idx *Index) DocCount() uint64 {
+	return idx.index.DocCount()
+}
+
+func (idx *Index) IndexWiki(storage Storage) error {
+	pages, err := storage.ListPages()
+	if err != nil {
+		log.Printf("Cannot get page list: %s\n", err)
+		return err
+	}
+
+	batch := bleve.NewBatch()
+	for _, pagePath := range pages {
+		page, _, err := storage.LookupPage(pagePath)
+		if err != nil {
+			log.Printf("Error loading page %s: %s\n", pagePath, err)
+			continue
+		}
+
+		wikiPage, err := page.ToWikiPage()
+		if err != nil {
+			log.Printf("Error converting page %s for indexing: %s\n", page.ShortName(), err)
+			continue
+		}
+
+		batch.Index(page.ShortName(), wikiPage)
+	}
+
+	err = idx.index.Batch(batch)
+	if err != nil {
+		log.Printf("Error executing index batch: %s\n", err)
+	}
+
+	return err
+}
+
 func (page *Page) ToWikiPage() (*WikiPage, error) {
 	text, err := page.RenderPlaintext()
 	if err != nil {

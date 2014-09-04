@@ -31,6 +31,14 @@ func main() {
 	}
 	defer index.Close()
 
+	if index.DocCount() == 0 {
+		go func() {
+			log.Printf("New index: Indexing all pages\n")
+			index.IndexWiki(storage)
+			log.Printf("Indexing done!\n")
+		}()
+	}
+
 	spock.DataDir = *dataDir
 	err = spock.RunServer(*address, storage, *indexSrv, index)
 	if err != nil {
