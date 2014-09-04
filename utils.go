@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Create 'filename' parent directories.
+// MkMissingDirs creates parent directories for the specified 'filename'.
 func MkMissingDirs(filename string) error {
 	dirname := filepath.Dir(filename)
 

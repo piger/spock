@@ -17,21 +17,26 @@ import (
 var (
 	sessionName  = "vandine-session"
 	staticPrefix = "/static/"
+
+	// DataDir is the directory containing HTML templates, static files and other
+	// runtime resources; this is exported so you can configure it from the cmd launcher.
 	DataDir      = "./data"
 )
 
-// web
+// User is a representation of a wiki user.
 type User struct {
 	Authenticated bool
 	Name          string
 	Email         string
 }
 
+// Alert is used to show informational messages in the web GUI.
 type Alert struct {
 	Level   string
 	Message string
 }
 
+// pageCache is a silly cache that will hold the rendered version of a wiki page.
 type pageCache struct {
 	lock        sync.RWMutex
 	PageRenders map[string][]byte
@@ -59,6 +64,7 @@ func (pc *pageCache) Flush(path string) {
 	delete(pc.PageRenders, path)
 }
 
+// PageCache contains the rendering cache.
 var PageCache *pageCache
 
 func init() {
@@ -207,9 +213,10 @@ func Login(w http.ResponseWriter, r *vRequest) {
 			r.Session.Save(r.Request, w)
 			http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
 			return
-		} else {
-			error = true
 		}
+
+		// else...
+		error = true
 	}
 
 	ctx := newTemplateContext(r)

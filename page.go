@@ -18,7 +18,7 @@ import (
 // rst2html program path
 var rst2htmlPath string
 
-var NewPageContent string = `---
+var NewPageContent = `---
 title: "My page"
 description: "A brief page description..."
 tags: [ "general" ]
@@ -110,9 +110,9 @@ func ShortenPageName(name string) string {
 	if ext := filepath.Ext(name); len(ext) > 0 {
 		l := len(name) - len(ext)
 		return name[0:l]
-	} else {
-		return name
 	}
+
+	return name
 }
 
 // A "short name" for a wiki page complete path.
@@ -121,9 +121,9 @@ func (page *Page) ShortName() string {
 	if len(ext) > 0 {
 		l := len(page.Path) - len(ext)
 		return page.Path[0:l]
-	} else {
-		return page.Path
 	}
+
+	return page.Path
 }
 
 func (page *Page) GetMarkup() string {
@@ -202,7 +202,7 @@ func renderMarkdown(content []byte) ([]byte, error) {
 
 // Lookup the correct 'rst2html' program inspecting $PATH
 func lookupRst() (string, error) {
-	var names []string = []string{"rst2html", "rst2html.py"}
+	var names = []string{"rst2html", "rst2html.py"}
 
 	for _, name := range names {
 		if rstbin, err := exec.LookPath(name); err == nil {
