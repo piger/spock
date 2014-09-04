@@ -27,6 +27,11 @@ language: "it"
 ---
 `
 
+const (
+	markdownName = "markdown"
+	rstName      = "rst"
+)
+
 func init() {
 	var err error
 	if rst2htmlPath, err = lookupRst(); err != nil {
@@ -131,9 +136,9 @@ func (page *Page) GetMarkup() string {
 	}
 	ext := filepath.Ext(page.Path)
 	if ext == ".md" {
-		return "markdown"
+		return markdownName
 	} else if ext == ".rst" {
-		return "rst"
+		return rstName
 	}
 
 	return ""
@@ -147,11 +152,11 @@ func (page *Page) Render() ([]byte, error) {
 
 	var html []byte
 	var err error
-	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
+	if page.Header.Markup == rstName || strings.HasSuffix(page.Path, ".rst") {
 		html, err = renderRst(page.Content)
 		// PageCache.Set(page.Path, html)
 		return html, err
-	} else if page.Header.Markup == "markdown" || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
+	} else if page.Header.Markup == markdownName || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
 		html, err = renderMarkdown(page.Content)
 		// PageCache.Set(page.Path, html)
 		return html, err
@@ -161,7 +166,7 @@ func (page *Page) Render() ([]byte, error) {
 }
 
 func (page *Page) RenderPlaintext() ([]byte, error) {
-	if page.GetMarkup() == "markdown" {
+	if page.GetMarkup() == markdownName {
 		extensions := 0
 		renderer := blackfridaytext.TextRenderer()
 		output := blackfriday.Markdown(page.Content, renderer, extensions)
@@ -172,9 +177,9 @@ func (page *Page) RenderPlaintext() ([]byte, error) {
 }
 
 func (page *Page) RenderPreview(content string) ([]byte, error) {
-	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
+	if page.Header.Markup == rstName || strings.HasSuffix(page.Path, ".rst") {
 		return renderRst([]byte(content))
-	} else if page.Header.Markup == "markdown" || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
+	} else if page.Header.Markup == markdownName || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
 		return renderMarkdown([]byte(content))
 	}
 
