@@ -20,7 +20,7 @@ var (
 
 	// DataDir is the directory containing HTML templates, static files and other
 	// runtime resources; this is exported so you can configure it from the cmd launcher.
-	DataDir      = "./data"
+	DataDir = "./data"
 )
 
 // User is a representation of a wiki user.
@@ -186,7 +186,17 @@ func AddAlert(message, level string, r *vRequest) {
 // views
 
 func IndexRedirect(w http.ResponseWriter, r *vRequest) {
-	http.Redirect(w, r.Request, "/index", http.StatusFound)
+	_, exists, err := r.Ctx.Storage.LookupPage("index")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if exists {
+		http.Redirect(w, r.Request, "/index", http.StatusFound)
+		return
+	}
+
+	ctx := newTemplateContext(r)
+	r.Ctx.RenderTemplate("welcome.html", ctx, w)
 }
 
 func Login(w http.ResponseWriter, r *vRequest) {
@@ -273,6 +283,7 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"diff.html",
 		"preview.html",
 		"delete.html",
+		"welcome.html",
 	}
 	baseTemplate := filepath.Join(DataDir, "templates", "base.html")
 	extraTemplate := filepath.Join(DataDir, "templates", "_extra.html")
