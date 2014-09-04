@@ -53,6 +53,16 @@ brew install mercurial cmake icu4c
 
 [brew]: http://brew.sh/
 
+You will also need to download a copy of [CodeMirror](CodeMirror) and unpack it
+inside the `data/static/` directory, so that you end up having:
+
+```
+$ ls data/static/
+codemirror-4.5/  css/  favicon.ico  fonts/  js/
+```
+
+[CodeMirror]: http://codemirror.net/codemirror.zip
+
 ### Building Spock
 
 To build Spock you first need to build a specific version of [libgit2](libgit2) along with `git2go`:
