@@ -212,7 +212,7 @@ func ShowPreview(page *Page, content string, w http.ResponseWriter, r *vRequest)
 	ctx := newTemplateContext(r)
 	ctx["pageName"] = page.ShortName()
 
-	html, err := page.RenderContent(content)
+	html, err := page.RenderPreview(content)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -18,6 +18,7 @@ import (
 // rst2html program path
 var rst2htmlPath string
 
+// NewPageContent is the initial content of a new Wiki page.
 var NewPageContent = `---
 title: "My page"
 description: "A brief page description..."
@@ -33,7 +34,7 @@ func init() {
 	}
 }
 
-// the optional YAML header of a wiki page.
+// PageHeader is the optional YAML header of a wiki page.
 type PageHeader struct {
 	Title       string
 	Description string
@@ -42,8 +43,8 @@ type PageHeader struct {
 	Markup      string
 }
 
-// A wiki page. The Path attribute contains the relative path to the file
-// containing the wiki page (e.g. docs/programming/python.md).
+// Page is a wiki page. The Path attribute contains the relative path
+// to the file containing the wiki page (e.g. docs/programming/python.md).
 type Page struct {
 	Path     string
 	Header   *PageHeader
@@ -51,12 +52,14 @@ type Page struct {
 	Content  []byte
 }
 
+// NewPage is the preferred way to create new Page objects.
 func NewPage(path string) *Page {
 	pageHdr := &PageHeader{}
 	page := &Page{Path: path, Header: pageHdr}
 	return page
 }
 
+// LoadPage loads a page from the filesystem.
 func LoadPage(path, relpath string) (*Page, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -106,6 +109,7 @@ func LoadPage(path, relpath string) (*Page, error) {
 	return page, nil
 }
 
+// ShortenPageName returns the filename without the extension.
 func ShortenPageName(name string) string {
 	if ext := filepath.Ext(name); len(ext) > 0 {
 		l := len(name) - len(ext)
@@ -115,17 +119,12 @@ func ShortenPageName(name string) string {
 	return name
 }
 
-// A "short name" for a wiki page complete path.
+// ShortName is the "short" (i.e. without the filename extension) name of a page.
 func (page *Page) ShortName() string {
-	ext := filepath.Ext(page.Path)
-	if len(ext) > 0 {
-		l := len(page.Path) - len(ext)
-		return page.Path[0:l]
-	}
-
-	return page.Path
+	return ShortenPageName(page.Path)
 }
 
+// GetMarkup return the page markup based on header informations or filename extension.
 func (page *Page) GetMarkup() string {
 	if page.Header.Markup != "" {
 		return page.Header.Markup
@@ -140,6 +139,7 @@ func (page *Page) GetMarkup() string {
 	return ""
 }
 
+// Render renders the HTML version of a Wiki page.
 func (page *Page) Render() ([]byte, error) {
 	// if cache, ok := PageCache.Get(page.Path); ok {
 	// 	return cache, nil
@@ -171,7 +171,7 @@ func (page *Page) RenderPlaintext() ([]byte, error) {
 	return page.RawBytes, nil
 }
 
-func (page *Page) RenderContent(content string) ([]byte, error) {
+func (page *Page) RenderPreview(content string) ([]byte, error) {
 	if page.Header.Markup == "rst" || strings.HasSuffix(page.Path, ".rst") {
 		return renderRst([]byte(content))
 	} else if page.Header.Markup == "markdown" || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
