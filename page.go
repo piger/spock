@@ -35,7 +35,8 @@ const (
 func init() {
 	var err error
 	if rst2htmlPath, err = lookupRst(); err != nil {
-		log.Fatal(err)
+		log.Printf("RestructuredText rendering disabled: %s\n", err)
+		rst2htmlPath = "/bin/cat"
 	}
 }
 
