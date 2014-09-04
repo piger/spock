@@ -20,9 +20,13 @@
       <p>Did you mean: <a href="/search?q={{urlquery .Suggestion}}">{{.Suggestion}}</a>?</p>
       {{end}}
 
-      {{range .results}}
-        <p>Title: <a href="/{{.Title}}">{{.Title}}</a></p>
-        <pre>{{.Highlight}}</pre>
+      <h3>{{.results.Total}} matches</h3>
+
+      {{range .results.Results}}
+        <div class="search-result">
+          <a href="/{{.Title}}">{{.Title}}</a>
+          <pre>{{.Highlight}}</pre>
+        </div>
       {{end}}
 
     </div><!-- /.col -->

@@ -4,7 +4,6 @@ import (
 	"code.google.com/p/xsrftoken"
 	"encoding/gob"
 	"fmt"
-	"github.com/blevesearch/bleve"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -172,11 +171,6 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 		}
 
 		// index the page
-		if err = r.Ctx.IndexDocument(page.Path); err != nil {
-			AddAlert(fmt.Sprintf("whoosh: Cannot index document %s: %s\n", page.Path, err), "warning", r)
-			r.Session.Save(r.Request, w)
-		}
-
 		if err = r.Ctx.Index.AddPage(page); err != nil {
 			AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
 			r.Session.Save(r.Request, w)
@@ -367,9 +361,14 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 	r.Ctx.RenderTemplate("diff.html", ctx, w)
 }
 
-type searchResult struct {
+type SearchResults struct {
+	Total   uint64
+	Took    time.Duration
+	Results []*SearchResult
+}
+
+type SearchResult struct {
 	Title     string
-	Lang      string
 	Highlight template.HTML
 }
 
@@ -405,28 +404,23 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	// test new search
-	altQ := bleve.NewMatchQuery(query)
-	altS := bleve.NewSearchRequest(altQ)
-	altS.Highlight = bleve.NewHighlight()
-	altR, err := r.Ctx.Index.index.Search(altS)
-	if err != nil {
-		log.Printf("Error in bleve search: %s\n", err)
-	} else {
-		log.Printf("Bleve results: %+v\n", altR)
+	srs := &SearchResults{Total: result.Total, Took: result.Took}
+	for _, hit := range result.Hits {
+		hl := ""
+		for _, fragments := range hit.Fragments {
+			// hl += fmt.Sprintf("%s:", fragmentField)
+			for _, fragment := range fragments {
+				hl += fmt.Sprintf("%s", fragment)
+			}
+		}
+		sr := &SearchResult{Title: hit.ID, Highlight: template.HTML(hl)}
+		srs.Results = append(srs.Results, sr)
 	}
 
 	ctx := newTemplateContext(r)
 	ctx["breadcrumbs"] = getBreadcrumbs(r)
 	ctx["SearchQuery"] = query
-	ctx["Suggestion"] = result.Suggestion
-
-	var rv []*searchResult
-	for _, r := range result.Results {
-		sr := &searchResult{Title: ShortenPageName(r.Title), Lang: r.Lang, Highlight: template.HTML(r.Highlight)}
-		rv = append(rv, sr)
-	}
-	ctx["results"] = rv
+	ctx["results"] = srs
 
 	r.Ctx.RenderTemplate("results.html", ctx, w)
 }
