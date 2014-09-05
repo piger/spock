@@ -25,6 +25,20 @@ There are many things I don't like about existing wiki softwares:
 
 **NOTE**: RestructuredText is **not** rendered by Go code, see below.
 
+## Usage
+
+The first time you launch Spock it will need to create the repository directory:
+
+```bash
+./spock -repo ~/Documents/wiki -index ~/Documents/wiki.idx -init
+```
+
+Typical usage:
+
+```bash
+./spock -repo ~/Documents/wiki -index ~/Documents/wiki.idx
+```
+
 ## Installation
 
 Requirements:
