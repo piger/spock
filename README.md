@@ -96,6 +96,17 @@ sudo pip install docutils
 sudo easy_install docutils
 ```
 
+### Packing a Linux distribution-independent archive
+
+To pack an archive containing a distribution-independent GNU/Linux version of Spock:
+
+```bash
+mkdir -p spock-linux-i386/lib/i386-linux-gnu
+for lib in `ldd spock | awk '$3 ~ /^\// { print $3 }'`; do cp $lib spock-linux-i386/lib/i386-linux-gnu/; done
+cp /lib/ld-linux.so.2 spock-linux-i386/lib/ld-linux-i386
+tar --xz -cvf spock-linux-i386.tar.xz spock-linux-i386
+```
+
 ## Author
 
 Daniel Kertesz <daniel@spatof.org>
