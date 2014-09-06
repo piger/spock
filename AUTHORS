@@ -1,0 +1,7 @@
+Spock is written by:
+Daniel Kertesz <daniel@spatof.org>
+
+Spock could not have been made without those libraries:
+- libgit2: https://github.com/libgit2/libgit2
+- git2go: https://github.com/libgit2/git2go
+- bleve: https://github.com/blevesearch/bleve

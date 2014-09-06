@@ -1,3 +1,7 @@
+// Copyright 2014 Daniel Kertesz <daniel@spatof.org>
+// All rights reserved. This program comes with ABSOLUTELY NO WARRANTY.
+// See the file LICENSE for details.
+
 package spock
 
 import (
