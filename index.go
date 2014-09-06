@@ -90,6 +90,8 @@ func (idx *Index) IndexWiki(storage Storage) error {
 	if err != nil {
 		log.Printf("Cannot get page list: %s\n", err)
 		return err
+	} else if len(pages) == 0 {
+		return nil
 	}
 
 	batch := bleve.NewBatch()
