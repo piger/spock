@@ -182,7 +182,11 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	ctx["page"] = page
-	ctx["content"] = template.HTML(page.RawBytes)
+	if len(page.RawBytes) > 0 {
+		ctx["content"] = template.HTML(page.RawBytes)
+	} else {
+		ctx["content"] = template.HTML(NewPageContent)
+	}
 	ctx["pageName"] = page.ShortName()
 	ctx["isNew"] = false
 	ctx["comment"] = ""
