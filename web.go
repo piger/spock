@@ -320,7 +320,7 @@ func RunServer(address string, ac *AppContext) error {
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
 	http.Handle("/", r)
 
-	log.Printf("Listening on: %s\n", address)
+	fmt.Printf("Wiki running on http://%s\n", address)
 	err := http.ListenAndServe(address, nil)
 	return err
 }
