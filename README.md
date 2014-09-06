@@ -8,20 +8,18 @@ Spock is a simple wiki software heavily inspired by [GitHub's Gollum](Gollum) an
 
 ## Why another wiki software?
 
-There are many things I don't like about existing wiki softwares:
-
-- CamelCase names are ugly
-- most wiki softwares uses awful markup languages from ten years ago
-- searching is usually painful
-- editing wiki pages must be done from the web interface **only**, while I usually prefer to use my text editor
-- you end up locked in within your wiki storage system (usually some gigantic RDBMS)
-- you usually need a full LAMP stack to run a wiki
+- I don't want to fight with runtime dependencies, virtualenvs and such.
+- I have a bunch of notes written in Markdown and RestructuredText formats.
+- I like to edit wiki pages with my text editor.
+- I like to use git to maintain the history of my notes.
+- I don't want to run a full LAMP stack just to use my wiki.
+- I'm having some fun with Go.
 
 ## Features
 
 - wiki pages can be written in Markdown or RestructuredText and can be edited with your preferred text editor
 - git is used as the underlying storage system
-- full text search
+- full text search (**beta**)
 
 **NOTE**: RestructuredText is **not** rendered by Go code, see below.
 
@@ -44,7 +42,7 @@ Typical usage:
 Requirements:
 
 - recent version of Go1 (tested on Go 1.3)
-- Python [docutils](docutils) (for `rst` rendering)
+- Python [docutils](docutils) (optional, used for `rst` rendering)
 - a C compiler
 - cmake (to build libgit2)
 - git
