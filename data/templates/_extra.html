@@ -1,6 +1,6 @@
 {{define "pageBar"}}
 <div class="btn-group">
-  <a class="btn btn-xs btn-info" href="/{{.}}">/{{.}}</a>
+  <a class="btn btn-xs btn-info" href="{{ reverse "show_page" "pagepath" . }}">/{{.}}</a>
   <a class="btn btn-xs btn-default" href="?edit=1">edit</a>
   <a class="btn btn-xs btn-default" href="?rename=1">rename</a></span>
   <a class="btn btn-xs btn-default" href="?log=1">log</a></span>
@@ -12,4 +12,19 @@
 {{range .}}
   <div class="alert alert-{{.Level}}">{{.Message}}</div>
 {{end}}
+{{end}}
+
+{{define "breadcrumbs"}}
+{{if .}}
+<ol class="breadcrumb">
+  {{range .}}
+    <li><a href="{{ reverse "show_page" "pagepath" . }}">{{.}}</a></li>
+  {{end}}
+</ol>
+{{end}}
+{{end}}
+
+{{define "pageHeader"}}
+{{template "breadcrumbs" .breadcrumbs}}
+{{template "alerts" .alerts}}
 {{end}}

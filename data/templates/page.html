@@ -4,16 +4,8 @@
   <div class="row">
     <div class="col-md-12">
 
-      {{if .breadcrumbs}}
-      <ol class="breadcrumb">
-        {{range .breadcrumbs}}
-          <li><a href="/{{.}}">{{.}}</a></li>
-        {{end}}
-      </ol>
-      {{end}}
+      {{template "pageHeader" .}}
 
-      {{template "alerts" .alerts}}
-      
       {{template "pageBar" .page.ShortName}}
 
       <div id="content">{{.content}}</div>
