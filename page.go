@@ -68,6 +68,46 @@ func NewPage(path string) *Page {
 	return page
 }
 
+func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
+	var content []byte
+	ph := &PageHeader{}
+
+	hdrtag := []byte("---")
+
+	// if the first bytes does not contain the YAML header
+	if string(data[0:3]) != string(hdrtag) {
+		return nil, data, nil
+	} else {
+		// read and parse the YAML header
+		var header []byte
+
+		// find the second yaml marker "---": we skip the first 3 bytes as we need to find
+		// the *second* row of "---"; after we have found the position we add back the 3
+		// bytes, to account for the first "---". Clear uh?
+		mark := bytes.Index(data[len(hdrtag):], hdrtag)
+		if mark == -1 {
+			return nil, content, errors.New("Cannot find the closing YAML marker")
+		}
+		mark += len(hdrtag)
+
+		// cross-platform way to find the end of the line
+		eolMark := bytes.Index(data[mark:], []byte("\n"))
+		if eolMark == -1 {
+			return nil, content, errors.New("Cannot find the second newline character")
+		}
+		headerEnd := mark + eolMark
+		header = data[0:headerEnd]
+		content = data[headerEnd:]
+
+		err := yaml.Unmarshal(header, ph)
+		if err != nil {
+			return nil, content, err
+		}
+	}
+
+	return ph, content, nil
+}
+
 // LoadPage loads a page from the filesystem.
 func LoadPage(path, relpath string) (*Page, error) {
 	file, err := os.Open(path)
@@ -82,37 +122,9 @@ func LoadPage(path, relpath string) (*Page, error) {
 	page := NewPage(relpath)
 	page.RawBytes = data
 
-	hdrtag := []byte("---")
-
-	// if the first bytes does not contain the YAML header
-	if string(data[0:3]) != string(hdrtag) {
-		page.Content = data
-	} else {
-		// read and parse the YAML header
-		var header []byte
-
-		// find the second yaml marker "---": we skip the first 3 bytes as we need to find
-		// the *second* row of "---"; after we have found the position we add back the 3
-		// bytes, to account for the first "---". Clear uh?
-		mark := bytes.Index(data[len(hdrtag):], hdrtag)
-		if mark == -1 {
-			return nil, errors.New("Cannot find the closing YAML marker")
-		}
-		mark += len(hdrtag)
-
-		// cross-platform way to find the end of the line
-		eolMark := bytes.Index(data[mark:], []byte("\n"))
-		if eolMark == -1 {
-			return nil, errors.New("Cannot find the second newline character")
-		}
-		headerEnd := mark + eolMark
-		header = data[0:headerEnd]
-		page.Content = data[headerEnd:]
-
-		err = yaml.Unmarshal(header, &page.Header)
-		if err != nil {
-			return nil, err
-		}
+	page.Header, page.Content, err = ParsePageBytes(data)
+	if err != nil {
+		return nil, err
 	}
 
 	return page, nil
@@ -174,6 +186,9 @@ func (page *Page) RenderPlaintext() ([]byte, error) {
 		extensions := 0
 		renderer := blackfridaytext.TextRenderer()
 		output := blackfriday.Markdown(page.Content, renderer, extensions)
+
+		fmt.Printf("DEBUG txt output:\n%s\n", output)
+
 		return output, nil
 	}
 
