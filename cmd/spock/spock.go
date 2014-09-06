@@ -32,7 +32,9 @@ func main() {
 	}
 	defer index.Close()
 
-	if index.DocCount() == 0 {
+	// If we are opening an existing repository and the index is empty we
+	// run an initial indexing of the whole repository content.
+	if index.DocCount() == 0 && !*initRepo {
 		go func() {
 			log.Printf("New index: Indexing all pages\n")
 			err = index.IndexWiki(storage)
