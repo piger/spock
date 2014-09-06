@@ -5,28 +5,37 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/piger/spock"
 	"log"
+	"path/filepath"
 )
 
 var (
 	address  = flag.String("address", "127.0.0.1:8080", "Bind address")
 	indexDir = flag.String("index", "./index.bleve", "Index directory")
-	repo     = flag.String("repo", ".", "Path to the git repository")
-	initRepo = flag.Bool("init", false, "Initialize a new repository")
+	repoDir  = flag.String("repo", ".", "Path to the git repository")
 	dataDir  = flag.String("datadir", "./data", "Path to the data directory")
+	initRepo = flag.Bool("init", false, "Initialize a new repository")
 	cfgFile  = flag.String("config", "./cfg_spock.json", "Path to the configuration file")
 )
+
+func makeAbs(p string) string {
+	rv, err := filepath.Abs(p)
+	if err != nil {
+		log.Fatalf("Cannot get absolute path for %s: %s\n", p, err)
+	}
+	return rv
+}
 
 func main() {
 	flag.Parse()
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	storage, err := spock.OpenGitStorage(*repo, *initRepo)
+	storage, err := spock.OpenGitStorage(makeAbs(*repoDir), *initRepo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	index, err := spock.OpenIndex(*indexDir)
+	index, err := spock.OpenIndex(makeAbs(*indexDir))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,7 +73,7 @@ func main() {
 	}
 
 	// XXX this is really ugly
-	spock.DataDir = *dataDir
+	spock.DataDir = makeAbs(*dataDir)
 
 	err = spock.RunServer(*address, appCtx)
 	if err != nil {

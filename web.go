@@ -20,6 +20,8 @@ var (
 
 	// DataDir is the directory containing HTML templates, static files and other
 	// runtime resources; this is exported so you can configure it from the cmd launcher.
+	// Unfortunately this is used by the RenderRst method in page.go; we should
+	// find a better way to handle this...
 	DataDir = "./data"
 )
 
