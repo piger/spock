@@ -15,6 +15,10 @@ type WikiPage struct {
 	BodyIt string `json:"body_it"`
 }
 
+func (wp *WikiPage) Type() string {
+	return "wikiPage"
+}
+
 type Index struct {
 	index bleve.Index
 	path  string
