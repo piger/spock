@@ -30,7 +30,9 @@ func buildIndexMapping() *bleve.IndexMapping {
 	enTextMapping.Analyzer = textEnAnalyzer
 
 	itTextMapping := bleve.NewTextFieldMapping()
-	itTextMapping.Analyzer = textItAnalyzer
+	// XXX the Italian analyzer is giving wrong results.
+	// itTextMapping.Analyzer = textItAnalyzer
+	itTextMapping.Analyzer = textAnalyzer
 
 	stdTextMapping := bleve.NewTextFieldMapping()
 	stdTextMapping.Analyzer = textAnalyzer
