@@ -294,17 +294,9 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 	return templates
 }
 
-func RunServer(address string, storage Storage, indexSrv string, index *Index) error {
+func RunServer(address string, ac *AppContext) error {
 	r := mux.NewRouter()
-
-	ac := &AppContext{
-		SessionStore: sessions.NewCookieStore([]byte("lalala")),
-		XsrfSecret:   "lalala",
-		Storage:      storage,
-		Templates:    loadTemplates(r),
-		IndexSrv:     indexSrv,
-		Index:        *index,
-	}
+	ac.Templates = loadTemplates(r)
 
 	http.Handle(staticPrefix,
 		http.StripPrefix(staticPrefix,
