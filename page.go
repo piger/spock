@@ -76,7 +76,7 @@ func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
 
 	// if the first bytes does not contain the YAML header
 	if string(data[0:3]) != string(hdrtag) {
-		return nil, data, nil
+		return ph, data, nil
 	} else {
 		// read and parse the YAML header
 		var header []byte
