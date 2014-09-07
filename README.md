@@ -1,6 +1,6 @@
 # Spock wiki
 
-Spock is a simple wiki software heavily inspired by [GitHub's Gollum](Gollum) and is mostly intended as a personal documentation system. I wrote it as a frontend for my technical notes.
+Spock is a simple wiki software heavily inspired by [GitHub's Gollum][Gollum] and is mostly intended as a personal documentation system. I wrote it as a frontend for my technical notes.
 
 [Gollum]: https://github.com/gollum/gollum
 
@@ -42,7 +42,7 @@ Typical usage:
 Requirements:
 
 - recent version of Go1 (tested on Go 1.3)
-- Python [docutils](docutils) (optional, used for `rst` rendering)
+- Python [docutils][docutils] (optional, used for `rst` rendering)
 - a C compiler
 - cmake (to build libgit2)
 - pkg-config (to build libgit2)
@@ -50,6 +50,7 @@ Requirements:
 - mercurial (to fetch some go dependencies)
 - Go 1.x (tested on Go 1.3)
 - icu4c
+- leveldb (optional)
 
 On a Debian based GNU/Linux system you should be able to install all the
 required dependencies running:
@@ -58,15 +59,15 @@ required dependencies running:
 sudo apt-get install python-docutils cmake git mercurial libicu-dev
 ```
 
-On OS X with [homebrew](homebrew):
+On OS X with [homebrew][homebrew]:
 
 ```bash
-brew install mercurial cmake icu4c pkg-config
+brew install mercurial cmake icu4c pkg-config libleveldb-dev
 ```
 
 [brew]: http://brew.sh/
 
-You will also need to download a copy of [CodeMirror](CodeMirror) and unpack it
+You will also need to download a copy of [CodeMirror][CodeMirror] and unpack it
 inside the `data/static/` directory, so that you end up having:
 
 ```
@@ -78,7 +79,7 @@ codemirror-4.5/  css/  favicon.ico  fonts/  js/
 
 ### Building Spock
 
-To build Spock you first need to build a specific version of [libgit2](libgit2) along with `git2go`:
+To build Spock you first need to build a specific version of [libgit2][libgit2] along with `git2go`:
 
 ```bash
 go get -d github.com/piger/git2go
@@ -88,12 +89,12 @@ git submodule update --init
 make install
 ```
 
-**NOTE**: `make install` will only build `git2go`, statically linking [libgit2](libgit2).
+**NOTE**: `make install` will only build `git2go`, statically linking [libgit2][libgit2].
 
 Now you can build Spock:
 
 ```bash
-go get -d github.com/piger/spock
+go get -d -tags "libstemmer icu leveldb" github.com/piger/spock
 cd $GOPATH/src/github.com/piger/spock
 # On GNU/Linux:
 go build -tags "libstemmer icu leveldb" cmd/spock/spock.go
@@ -101,7 +102,7 @@ go build -tags "libstemmer icu leveldb" cmd/spock/spock.go
 ./build-osx.sh
 ```
 
-To render `RestructuredText` pages you will also need the `rst2html` program, included in [docutils](docutils) Python package; `rst2html` must be present in `$PATH`:
+To render `RestructuredText` pages you will also need the `rst2html` program, included in [docutils][docutils] Python package; `rst2html` must be present in `$PATH`:
 
 ```bash
 sudo pip install docutils
