@@ -286,7 +286,6 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"rename.html",
 		"results.html",
 		"diff.html",
-		"preview.html",
 		"delete.html",
 		"welcome.html",
 	}
