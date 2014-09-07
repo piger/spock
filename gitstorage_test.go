@@ -208,6 +208,6 @@ func TestListPages(t *testing.T) {
 	pages, err := gs.ListPages()
 	checkFatal(t, err)
 	if len(pages) != 2 {
-		t.Fatal("There should be 2 pages, there are %d", len(pages))
+		t.Fatalf("There should be 2 pages, there are %d", len(pages))
 	}
 }
