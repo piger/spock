@@ -379,6 +379,12 @@ func (gs *GitStorage) SavePage(page *Page, sig *CommitSignature, message string)
 func (gs *GitStorage) ListPages() ([]string, error) {
 	var result []string
 
+	// Return early if we are on a new repository (i.e. one without a "root"
+	// commit).
+	if !gs.hasRootCommit() {
+		return result, nil
+	}
+
 	exts := make(map[string]bool)
 	for _, ext := range PAGE_EXTENSIONS {
 		exts["."+ext] = true
