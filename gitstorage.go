@@ -423,21 +423,15 @@ func (gs *GitStorage) treeFromId(id string) (*git.Tree, error) {
 	return commit.Tree()
 }
 
-func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
-	// last commit for file
-	lastCommitLog, err := gs.GetLastCommit(page.Path)
+func (gs *GitStorage) DiffPage(page *Page, revA, revB string) ([]string, error) {
+	// commit A
+	oldTree, err := gs.treeFromId(revA)
 	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	currentTree, err := gs.treeFromId(lastCommitLog.Id)
-	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 
-	// other commit
-	otherTree, err := gs.treeFromId(otherId)
+	// commit B
+	newTree, err := gs.treeFromId(revB)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -450,7 +444,7 @@ func (gs *GitStorage) DiffPage(page *Page, otherId string) ([]string, error) {
 		return nil, err
 	}
 
-	diff, err := gs.r.DiffTreeToTree(otherTree, currentTree, &diffopts)
+	diff, err := gs.r.DiffTreeToTree(newTree, oldTree, &diffopts)
 	if err != nil {
 		log.Print(err)
 		return nil, err

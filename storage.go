@@ -34,7 +34,7 @@ type Storage interface {
 	ListPages() ([]string, error)
 
 	// Returns a diff between the current page content and another revision. (rewrite?)
-	DiffPage(page *Page, otherSha string) ([]string, error)
+	DiffPage(page *Page, revA, revB string) ([]string, error)
 }
 
 // The struct used to pack all informations regarding a single VCS commit.

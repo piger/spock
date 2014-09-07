@@ -317,7 +317,7 @@ func RunServer(address string, ac *AppContext) error {
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("log", "1").Name("show_log")
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("rename", "1").Name("rename_page")
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DeletePage))).Queries("delete", "1").Name("delete_page")
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("diff", "{sha:[a-zA-Z0-9]{40}}").Name("diff_page")
+	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("diff", "1", "oldrev", "{oldrev:[a-zA-Z0-9]{40}}", "newrev", "{newrev:[a-zA-Z0-9]{40}}").Name("diff_page")
 
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
 	http.Handle("/", r)

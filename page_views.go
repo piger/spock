@@ -260,6 +260,7 @@ func ShowPageLog(w http.ResponseWriter, r *vRequest) {
 	}
 
 	ctx := newTemplateContext(r)
+	ctx["page"] = page
 	ctx["pageName"] = page.ShortName()
 	ctx["breadcrumbs"] = getBreadcrumbs(r)
 
@@ -353,33 +354,6 @@ func RenamePage(w http.ResponseWriter, r *vRequest) {
 	ctx["formError"] = formError
 
 	r.Ctx.RenderTemplate("rename.html", ctx, w)
-}
-
-func DiffPage(w http.ResponseWriter, r *vRequest) {
-	pagepath := getPagePath(r)
-	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else if !exists {
-		http.NotFound(w, r.Request)
-		return
-	}
-
-	vars := mux.Vars(r.Request)
-	shaParam := vars["sha"]
-	diffs, err := r.Ctx.Storage.DiffPage(page, shaParam)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	ctx := newTemplateContext(r)
-	ctx["Diffs"] = diffs
-	ctx["breadcrumbs"] = getBreadcrumbs(r)
-	ctx["pageName"] = page.ShortName()
-
-	r.Ctx.RenderTemplate("diff.html", ctx, w)
 }
 
 type SearchResults struct {
@@ -497,4 +471,49 @@ func DeletePage(w http.ResponseWriter, r *vRequest) {
 	ctx["pageName"] = page.ShortName()
 
 	r.Ctx.RenderTemplate("delete.html", ctx, w)
+}
+
+func DiffPage(w http.ResponseWriter, r *vRequest) {
+	pagepath := getPagePath(r)
+	page, exists, err := r.Ctx.Storage.LookupPage(pagepath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !exists {
+		http.NotFound(w, r.Request)
+		return
+	}
+
+	if err := r.Request.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	vars := mux.Vars(r.Request)
+	oldRev, ok1 := vars["oldrev"]
+	newRev, ok2 := vars["newrev"]
+
+	if !ok1 || !ok2 {
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
+		return
+	}
+
+	if oldRev == "" || newRev == "" {
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
+		return
+	}
+
+	diffs, err := r.Ctx.Storage.DiffPage(page, oldRev, newRev)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ctx := newTemplateContext(r)
+	ctx["page"] = page
+	ctx["pageName"] = page.ShortName()
+	ctx["Diffs"] = diffs
+	ctx["breadcrumbs"] = getBreadcrumbs(r)
+
+	r.Ctx.RenderTemplate("diff.html", ctx, w)
 }
