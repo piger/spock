@@ -195,11 +195,11 @@ func (page *Page) RenderPlaintext() ([]byte, error) {
 	return page.RawBytes, nil
 }
 
-func (page *Page) RenderPreview(content string) ([]byte, error) {
+func (page *Page) RenderPreview(content []byte) ([]byte, error) {
 	if page.Header.Markup == rstName || strings.HasSuffix(page.Path, ".rst") {
-		return renderRst([]byte(content))
+		return renderRst(content)
 	} else if page.Header.Markup == markdownName || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
-		return renderMarkdown([]byte(content))
+		return renderMarkdown(content)
 	}
 
 	return []byte(page.Content), errors.New("Unknown format")

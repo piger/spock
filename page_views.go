@@ -136,6 +136,9 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
+	ctx := newTemplateContext(r)
+	preview := false
+
 	if r.Request.Method == "POST" {
 		if err := r.Request.ParseForm(); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -153,50 +156,66 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 		doPreview := r.Request.PostFormValue("preview")
 
 		if doPreview != "" {
-			ShowPreview(page, content, w, r)
+			preview = true
+
+			_, pageContent, err := ParsePageBytes([]byte(content))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			html, err := page.RenderPreview(pageContent)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			ctx["preview"] = template.HTML(html)
+			ctx["content"] = template.HTML(content)
+		} else {
+
+			if comment == "" {
+				comment = "(no comment)"
+			}
+			fullname, email := LookupAuthor(r)
+
+			// Update page RawBytes, header and content with the new data.
+			page.RawBytes = []byte(content)
+			page.Header, page.Content, err = ParsePageBytes(page.RawBytes)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			sig := &CommitSignature{
+				Name:  fullname,
+				Email: email,
+				When:  time.Now(),
+			}
+			err := r.Ctx.Storage.SavePage(page, sig, comment)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// index the page
+			if err = r.Ctx.Index.AddPage(page); err != nil {
+				AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
+				r.Session.Save(r.Request, w)
+			}
+
+			http.Redirect(w, r.Request, "/"+page.ShortName(), http.StatusSeeOther)
 			return
 		}
-
-		if comment == "" {
-			comment = "(no comment)"
-		}
-		fullname, email := LookupAuthor(r)
-
-		// Update page RawBytes, header and content with the new data.
-		page.RawBytes = []byte(content)
-		page.Header, page.Content, err = ParsePageBytes(page.RawBytes)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		sig := &CommitSignature{
-			Name:  fullname,
-			Email: email,
-			When:  time.Now(),
-		}
-		err := r.Ctx.Storage.SavePage(page, sig, comment)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// index the page
-		if err = r.Ctx.Index.AddPage(page); err != nil {
-			AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
-			r.Session.Save(r.Request, w)
-		}
-
-		http.Redirect(w, r.Request, "/"+page.ShortName(), http.StatusSeeOther)
-		return
 	}
 
-	ctx := newTemplateContext(r)
 	ctx["page"] = page
-	if len(page.RawBytes) > 0 {
-		ctx["content"] = template.HTML(page.RawBytes)
-	} else {
-		ctx["content"] = template.HTML(NewPageContent)
+	if !preview {
+		// If the user is editing a new page we will show the new page template
+		if len(page.RawBytes) > 0 {
+			ctx["content"] = template.HTML(page.RawBytes)
+		} else {
+			ctx["content"] = template.HTML(NewPageContent)
+		}
 	}
 	ctx["pageName"] = page.ShortName()
 	ctx["isNew"] = false
@@ -221,19 +240,6 @@ func LookupAuthor(r *vRequest) (fullname, email string) {
 	}
 
 	return
-}
-
-func ShowPreview(page *Page, content string, w http.ResponseWriter, r *vRequest) {
-	ctx := newTemplateContext(r)
-	ctx["pageName"] = page.ShortName()
-
-	html, err := page.RenderPreview(content)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	ctx["preview"] = template.HTML(html)
-	r.Ctx.RenderTemplate("preview.html", ctx, w)
 }
 
 func ShowPageLog(w http.ResponseWriter, r *vRequest) {
