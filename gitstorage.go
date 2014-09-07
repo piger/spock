@@ -84,34 +84,26 @@ func (gs *GitStorage) hasRootCommit() bool {
 	return true
 }
 
-func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (revId RevID, err error) {
+func (gs *GitStorage) saveIndex(idx *git.Index, signature *CommitSignature, message string) (*git.Oid, error) {
 	sig := &git.Signature{
 		Name:  signature.Name,
 		Email: signature.Email,
 		When:  signature.When,
 	}
 
-	idx, err := gs.r.Index()
-	if err != nil {
-		return
-	}
-	// XXX should we "RemoveByPath()" on error condition ?
-	if err = idx.AddByPath(path); err != nil {
-		return
-	}
 	treeId, err := idx.WriteTree()
 	if err != nil {
-		return
+		return nil, err
 	}
+
 	// http://stackoverflow.com/questions/16056759/untracked-dirs-on-commit-with-pygit2
 	// We need to also call Write() to avoid leaving "untracked files".
 	if err = idx.Write(); err != nil {
-		return
+		return nil, err
 	}
-
 	tree, err := gs.r.LookupTree(treeId)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	var commitId *git.Oid
@@ -120,13 +112,28 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 
 		currentTip, _, err = gs.currentState()
 		if err != nil {
-			return
+			return nil, err
 		}
 
 		commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
 	} else {
 		commitId, err = gs.r.CreateCommit("HEAD", sig, sig, message, tree)
 	}
+
+	return commitId, err
+}
+
+func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, message string) (revId RevID, err error) {
+	idx, err := gs.r.Index()
+	if err != nil {
+		return
+	}
+	// XXX should we "RemoveByPath()" on error condition ?
+	if err = idx.AddByPath(path); err != nil {
+		return
+	}
+
+	commitId, err := gs.saveIndex(idx, signature, message)
 	if err != nil {
 		return
 	}
@@ -136,12 +143,6 @@ func (gs *GitStorage) CommitFile(path string, signature *CommitSignature, messag
 }
 
 func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSignature, message string) (revId RevID, err error) {
-	sig := &git.Signature{
-		Name:  signature.Name,
-		Email: signature.Email,
-		When:  signature.When,
-	}
-
 	idx, err := gs.r.Index()
 	if err != nil {
 		return
@@ -161,26 +162,8 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 	if err = idx.RemoveByPath(origPath); err != nil {
 		return
 	}
-	treeId, err := idx.WriteTree()
-	if err != nil {
-		return
-	}
-	// http://stackoverflow.com/questions/16056759/untracked-dirs-on-commit-with-pygit2
-	// We need to also call Write() to avoid leaving "untracked files".
-	if err = idx.Write(); err != nil {
-		return
-	}
 
-	currentTip, _, err := gs.currentState()
-	if err != nil {
-		return
-	}
-
-	tree, err := gs.r.LookupTree(treeId)
-	if err != nil {
-		return
-	}
-	commitId, err := gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
+	commitId, err := gs.saveIndex(idx, signature, message)
 	if err != nil {
 		return
 	}
@@ -190,12 +173,6 @@ func (gs *GitStorage) RenamePage(origPath, destPath string, signature *CommitSig
 }
 
 func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, message string) (revId RevID, err error) {
-	sig := &git.Signature{
-		Name:  signature.Name,
-		Email: signature.Email,
-		When:  signature.When,
-	}
-
 	idx, err := gs.r.Index()
 	if err != nil {
 		return
@@ -208,29 +185,12 @@ func (gs *GitStorage) DeletePage(path string, signature *CommitSignature, messag
 	if err = idx.RemoveByPath(path); err != nil {
 		return
 	}
-	treeId, err := idx.WriteTree()
-	if err != nil {
-		return
-	}
-	// http://stackoverflow.com/questions/16056759/untracked-dirs-on-commit-with-pygit2
-	// We need to also call Write() to avoid leaving "untracked files".
-	if err = idx.Write(); err != nil {
-		return
-	}
 
-	currentTip, _, err := gs.currentState()
+	commitId, err := gs.saveIndex(idx, signature, message)
 	if err != nil {
 		return
 	}
 
-	tree, err := gs.r.LookupTree(treeId)
-	if err != nil {
-		return
-	}
-	commitId, err := gs.r.CreateCommit("HEAD", sig, sig, message, tree, currentTip)
-	if err != nil {
-		return
-	}
 	revId = RevID(commitId.String())
 
 	return
