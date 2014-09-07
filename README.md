@@ -45,6 +45,7 @@ Requirements:
 - Python [docutils](docutils) (optional, used for `rst` rendering)
 - a C compiler
 - cmake (to build libgit2)
+- pkg-config (to build libgit2)
 - git
 - mercurial (to fetch some go dependencies)
 - Go 1.x (tested on Go 1.3)
@@ -60,7 +61,7 @@ sudo apt-get install python-docutils cmake git mercurial libicu-dev
 On OS X with [homebrew](homebrew):
 
 ```bash
-brew install mercurial cmake icu4c
+brew install mercurial cmake icu4c pkg-config
 ```
 
 [brew]: http://brew.sh/
