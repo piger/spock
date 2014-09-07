@@ -6,16 +6,17 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/piger/spock"
 	"log"
+	"os"
 	"path/filepath"
 )
 
 var (
 	address  = flag.String("address", "127.0.0.1:8080", "Bind address")
-	indexDir = flag.String("index", "./index.bleve", "Index directory")
-	repoDir  = flag.String("repo", ".", "Path to the git repository")
+	repoDir  = flag.String("repo", "", "Path to the git repository")
 	dataDir  = flag.String("datadir", "./data", "Path to the data directory")
 	initRepo = flag.Bool("init", false, "Initialize a new repository")
 	cfgFile  = flag.String("config", "./cfg_spock.json", "Path to the configuration file")
@@ -32,6 +33,12 @@ func makeAbs(p string) string {
 func main() {
 	flag.Parse()
 
+	if len(*repoDir) == 0 {
+		fmt.Printf("ERROR: You must specify a repository with -repo\nUsage:\n")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	storage, err := spock.OpenGitStorage(makeAbs(*repoDir), *initRepo)
@@ -39,7 +46,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	index, err := spock.OpenIndex(makeAbs(*indexDir))
+	index, err := spock.OpenIndex(makeAbs(*repoDir))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -7,11 +7,15 @@ package spock
 import (
 	"github.com/blevesearch/bleve"
 	"log"
+	"path/filepath"
 )
 
-const textAnalyzer = "standard"
-const textEnAnalyzer = "en"
-const textItAnalyzer = "it"
+const (
+	IndexDirName   = ".bleve"
+	textAnalyzer   = "standard"
+	textEnAnalyzer = "en"
+	textItAnalyzer = "it"
+)
 
 type WikiPage struct {
 	Title  string `json:"title"`
@@ -53,7 +57,9 @@ func buildIndexMapping() *bleve.IndexMapping {
 	return mapping
 }
 
-func OpenIndex(path string) (*Index, error) {
+func OpenIndex(basepath string) (*Index, error) {
+	path := filepath.Join(basepath, IndexDirName)
+
 	index, err := bleve.Open(path)
 	if err == bleve.ErrorIndexPathDoesNotExist {
 		log.Println("Creating a new search index")
