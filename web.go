@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	sessionName  = "vandine-session"
+	sessionName  = "spock-session"
 	staticPrefix = "/static/"
 
 	// DataDir is the directory containing HTML templates, static files and other
