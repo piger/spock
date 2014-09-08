@@ -6,6 +6,8 @@
 
 set -e
 
+ARCH=$(uname -m)
+
 base="$(dirname $0)"
 
 if [[ ! -d $base ]]; then
@@ -13,8 +15,8 @@ if [[ ! -d $base ]]; then
     exit 1
 fi
 
-SPOCK_LD_LIBRARY_PATH="${base}/lib/i386-linux-gnu"
-SPOCK_LINKER="${base}/lib/ld-linux-i386"
+SPOCK_LD_LIBRARY_PATH="${base}/lib/${ARCH}-linux-gnu"
+SPOCK_LINKER="${base}/lib/ld-linux-${ARCH}"
 
 exec "$SPOCK_LINKER" --library-path "$SPOCK_LD_LIBRARY_PATH" \
     "${base}/spock" -datadir "${base}/data" "$@"
