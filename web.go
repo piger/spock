@@ -289,11 +289,8 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"delete.html",
 		"welcome.html",
 	}
-	baseTemplate := filepath.Join(DataDir, "templates", "base.html")
-	extraTemplate := filepath.Join(DataDir, "templates", "_extra.html")
 	for _, tplName := range templateNames {
-		t := template.Must(template.New(tplName).Funcs(funcMap).ParseFiles(filepath.Join(DataDir, "templates", tplName), baseTemplate, extraTemplate))
-		templates[tplName] = t
+		templates[tplName] = LoadTemplate(&funcMap, tplName)
 	}
 	return templates
 }
@@ -302,9 +299,7 @@ func RunServer(address string, ac *AppContext) error {
 	r := mux.NewRouter()
 	ac.Templates = loadTemplates(r)
 
-	http.Handle(staticPrefix,
-		http.StripPrefix(staticPrefix,
-			http.FileServer(http.Dir(filepath.Join(DataDir, "static")))))
+	SetupStaticRoute(staticPrefix, filepath.Join(DataDir, "static"))
 
 	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexRedirect))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
