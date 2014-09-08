@@ -28,29 +28,29 @@ Spock is a simple wiki software heavily inspired by [GitHub's Gollum][Gollum] an
 The first time you launch Spock it will need to create the repository directory:
 
 ```bash
-./spock -repo ~/Documents/wiki -index ~/Documents/wiki.idx -init
+./spock -repo ~/Documents/wiki -init
 ```
 
 Typical usage:
 
 ```bash
-./spock -repo ~/Documents/wiki -index ~/Documents/wiki.idx
+./spock -repo ~/Documents/wiki
 ```
 
-## Installation
+## Building Spock
 
 Requirements:
 
 - recent version of Go1 (tested on Go 1.3)
-- Python [docutils][docutils] (optional, used for `rst` rendering)
 - a C compiler
 - cmake (to build libgit2)
 - pkg-config (to build libgit2)
-- git
+- git (to fetch some go dependencies)
 - mercurial (to fetch some go dependencies)
 - Go 1.x (tested on Go 1.3)
 - icu4c
 - leveldb (optional)
+- Python [docutils][docutils] (optional, used for `rst` rendering)
 
 On a Debian based GNU/Linux system you should be able to install all the
 required dependencies running:
@@ -59,13 +59,11 @@ required dependencies running:
 sudo apt-get install python-docutils cmake git mercurial libicu-dev
 ```
 
-On OS X with [homebrew][homebrew]:
+On OS X with [homebrew](http://brew.sh):
 
 ```bash
 brew install mercurial cmake icu4c pkg-config libleveldb-dev
 ```
-
-[brew]: http://brew.sh/
 
 You will also need to download a copy of [CodeMirror][CodeMirror] and unpack it
 inside the `data/static/` directory, so that you end up having:
@@ -91,7 +89,7 @@ make install
 
 **NOTE**: `make install` will only build `git2go`, statically linking [libgit2][libgit2].
 
-Now you can build Spock:
+Now you can build Spock (you can safely omit `leveldb` if your system doesn't ship with an up to date version of the library):
 
 ```bash
 go get -d -tags "libstemmer icu leveldb" github.com/piger/spock
