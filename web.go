@@ -312,7 +312,7 @@ func RunServer(address string, ac *AppContext) error {
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
 	r.Handle("/search", WithRequest(ac, vHandlerFunc(SearchPages))).Name("search_pages")
 
-	pagePattern := "/{pagepath:[a-zA-Z0-9_/.]+}"
+	pagePattern := "/{pagepath:[a-zA-Z0-9_/.-]+}"
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(EditPage))).Queries("edit", "1").Name("edit_page")
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("log", "1").Name("show_log")
 	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("rename", "1").Name("rename_page")
