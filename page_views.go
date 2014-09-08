@@ -100,16 +100,9 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	lastlog, err := r.Ctx.Storage.GetLastCommit(page.Path)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	ctx["breadcrumbs"] = updateBreadcrumbs(w, r, page)
 	ctx["page"] = page
 	ctx["content"] = template.HTML(html)
-	ctx["lastlog"] = lastlog
 	ctx["render_time"] = time.Since(renderStart)
 	ctx["alerts"] = GetAlerts(r, w)
 
