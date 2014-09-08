@@ -9,7 +9,11 @@ import (
 )
 
 func (ac *AppContext) Search(searchQuery string) (*bleve.SearchResult, error) {
-	query := bleve.NewMatchQuery(searchQuery)
+	// query := bleve.NewQueryStringQuery(searchQuery)
+	queryEn := bleve.NewMatchQuery(searchQuery).SetField("body_en")
+	queryIt := bleve.NewMatchQuery(searchQuery).SetField("body_it")
+	queryTitle := bleve.NewMatchQuery(searchQuery).SetField("title")
+	query := bleve.NewDisjunctionQuery([]bleve.Query{queryEn, queryIt, queryTitle})
 	req := bleve.NewSearchRequest(query)
 	req.Highlight = bleve.NewHighlight()
 	return ac.Index.index.Search(req)
