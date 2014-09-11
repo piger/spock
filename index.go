@@ -11,7 +11,9 @@ import (
 )
 
 const (
-	IndexDirName   = ".bleve"
+	// IndexDirName is the name of the directory containing the bleve index
+	IndexDirName = ".bleve"
+
 	textAnalyzer   = "standard"
 	textEnAnalyzer = "en"
 	textItAnalyzer = "it"
@@ -38,9 +40,7 @@ func buildIndexMapping() *bleve.IndexMapping {
 	enTextMapping.Analyzer = textEnAnalyzer
 
 	itTextMapping := bleve.NewTextFieldMapping()
-	// XXX the Italian analyzer is giving wrong results.
-	// itTextMapping.Analyzer = textItAnalyzer
-	itTextMapping.Analyzer = textAnalyzer
+	itTextMapping.Analyzer = textItAnalyzer
 
 	stdTextMapping := bleve.NewTextFieldMapping()
 	stdTextMapping.Analyzer = textAnalyzer
@@ -53,6 +53,8 @@ func buildIndexMapping() *bleve.IndexMapping {
 
 	mapping := bleve.NewIndexMapping()
 	mapping.AddDocumentMapping("wikiPage", wikiPageMapping)
+
+	mapping.DefaultAnalyzer = textAnalyzer
 
 	return mapping
 }
@@ -140,4 +142,15 @@ func (page *Page) ToWikiPage() (*WikiPage, error) {
 		return &WikiPage{Title: page.ShortName(), BodyIt: body}, nil
 	}
 	return &WikiPage{Title: page.ShortName(), BodyEn: body}, nil
+}
+
+func (ac *AppContext) Search(searchQuery string) (*bleve.SearchResult, error) {
+	// query := bleve.NewQueryStringQuery(searchQuery)
+	queryEn := bleve.NewMatchQuery(searchQuery).SetField("body_en")
+	queryIt := bleve.NewMatchQuery(searchQuery).SetField("body_it")
+	queryTitle := bleve.NewMatchQuery(searchQuery).SetField("title")
+	query := bleve.NewDisjunctionQuery([]bleve.Query{queryEn, queryIt, queryTitle})
+	req := bleve.NewSearchRequestOptions(query, 100, 0, false)
+	req.Highlight = bleve.NewHighlight()
+	return ac.Index.index.Search(req)
 }
