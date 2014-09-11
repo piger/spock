@@ -193,6 +193,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			// index the page
 			if err = r.Ctx.Index.AddPage(page); err != nil {
 				AddAlert(fmt.Sprintf("bleve: Cannot index document %s: %s\n", page.Path, err), "warning", r)
+				log.Printf("Error indexing document %s: %s\n", page, err)
 				r.Session.Save(r.Request, w)
 			}
 

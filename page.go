@@ -149,6 +149,10 @@ func (page *Page) ShortName() string {
 	return ShortenPageName(page.Path)
 }
 
+func (page *Page) String() string {
+	return fmt.Sprintf("Page[%s]", page.Path)
+}
+
 // GetMarkup return the page markup based on header informations or filename extension.
 func (page *Page) GetMarkup() (markup string) {
 	if page.Header.Markup != "" {
