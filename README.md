@@ -56,13 +56,13 @@ On a Debian based GNU/Linux system you should be able to install all the
 required dependencies running:
 
 ```bash
-sudo apt-get install python-docutils cmake git mercurial libicu-dev
+sudo apt-get install python-docutils cmake git mercurial libicu-dev libleveldb-dev
 ```
 
 On OS X with [homebrew](http://brew.sh):
 
 ```bash
-brew install mercurial cmake icu4c pkg-config libleveldb-dev
+brew install mercurial cmake icu4c pkg-config leveldb
 ```
 
 You will also need to download a copy of [CodeMirror][CodeMirror] and unpack it
@@ -77,17 +77,16 @@ codemirror-4.5/  css/  favicon.ico  fonts/  js/
 
 ### Building Spock
 
-To build Spock you first need to build a specific version of [libgit2][libgit2] along with `git2go`:
+To build Spock you first need to build `git2go` linking to a specific version of [libgit2][libgit2]
 
 ```bash
-go get -d github.com/piger/git2go
-cd $GOPATH/src/github.com/piger/git2go
-git checkout dev
+go get -d github.com/libgit2/git2go
+cd $GOPATH/src/github.com/libgit2/git2go
 git submodule update --init
 make install
 ```
 
-**NOTE**: `make install` will only build `git2go`, statically linking [libgit2][libgit2].
+**NOTE**: `make install` will only build `git2go`, statically linking [libgit2][libgit2]
 
 Now you can build Spock (you can safely omit `leveldb` if your system doesn't ship with an up to date version of the library):
 
