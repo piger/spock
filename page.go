@@ -150,59 +150,61 @@ func (page *Page) ShortName() string {
 }
 
 // GetMarkup return the page markup based on header informations or filename extension.
-func (page *Page) GetMarkup() string {
+func (page *Page) GetMarkup() (markup string) {
 	if page.Header.Markup != "" {
-		return page.Header.Markup
+		markup = page.Header.Markup
+	} else {
+		ext := filepath.Ext(page.Path)
+		switch ext {
+		case ".md", ".txt":
+			markup = markdownName
+		case ".rst":
+			markup = rstName
+		default:
+			markup = ext[1:]
+		}
 	}
-	ext := filepath.Ext(page.Path)
-	if ext == ".md" {
-		return markdownName
-	} else if ext == ".rst" {
-		return rstName
-	}
-
-	return ""
+	return
 }
 
 // Render renders the HTML version of a Wiki page.
-func (page *Page) Render() ([]byte, error) {
-	// if cache, ok := PageCache.Get(page.Path); ok {
-	// 	return cache, nil
-	// }
-
-	var html []byte
-	var err error
-	if page.Header.Markup == rstName || strings.HasSuffix(page.Path, ".rst") {
-		html, err = renderRst(page.Content)
-		// PageCache.Set(page.Path, html)
-		return html, err
-	} else if page.Header.Markup == markdownName || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
+func (page *Page) Render() (html []byte, err error) {
+	markup := page.GetMarkup()
+	switch markup {
+	case markdownName:
 		html, err = renderMarkdown(page.Content)
-		// PageCache.Set(page.Path, html)
-		return html, err
+	case rstName:
+		html, err = renderRst(page.Content)
+	default:
+		html, err = []byte(page.Content), fmt.Errorf("Unknown format: %s", markup)
 	}
-
-	return []byte(page.Content), errors.New("Unknown format")
+	return html, err
 }
 
-func (page *Page) RenderPlaintext() ([]byte, error) {
-	if page.GetMarkup() == markdownName {
+func (page *Page) RenderPlaintext() (txt []byte, err error) {
+	switch page.GetMarkup() {
+	case markdownName:
 		extensions := 0
 		renderer := blackfridaytext.TextRenderer()
-		return blackfriday.Markdown(page.Content, renderer, extensions), nil
+		txt, err = blackfriday.Markdown(page.Content, renderer, extensions), nil
+	default:
+		// we won't return an error because text rendering is "best effort" :)
+		txt, err = page.RawBytes, nil
 	}
-
-	return page.RawBytes, nil
+	return txt, err
 }
 
-func (page *Page) RenderPreview(content []byte) ([]byte, error) {
-	if page.Header.Markup == rstName || strings.HasSuffix(page.Path, ".rst") {
-		return renderRst(content)
-	} else if page.Header.Markup == markdownName || strings.HasSuffix(page.Path, ".md") || strings.HasSuffix(page.Path, ".txt") {
-		return renderMarkdown(content)
+func (page *Page) RenderPreview(content []byte) (html []byte, err error) {
+	markup := page.GetMarkup()
+	switch markup {
+	case markdownName:
+		html, err = renderMarkdown(content)
+	case rstName:
+		html, err = renderRst(content)
+	default:
+		html, err = []byte(content), fmt.Errorf("Unknown format: %s", markup)
 	}
-
-	return []byte(page.Content), errors.New("Unknown format")
+	return html, err
 }
 
 func renderMarkdown(content []byte) ([]byte, error) {
