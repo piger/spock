@@ -7,7 +7,7 @@ package spock
 import (
 	"errors"
 	"fmt"
-	"github.com/piger/git2go"
+	"github.com/libgit2/git2go"
 	"io/ioutil"
 	"log"
 	"os"
