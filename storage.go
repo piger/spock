@@ -35,6 +35,9 @@ type Storage interface {
 
 	// Returns a diff between the current page content and another revision. (rewrite?)
 	DiffPage(page *Page, revA, revB string) ([]string, error)
+
+	// TEST
+	GetStatus() error
 }
 
 // The struct used to pack all informations regarding a single VCS commit.

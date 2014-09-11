@@ -7,7 +7,7 @@ package spock
 import (
 	"errors"
 	"fmt"
-	"github.com/piger/git2go"
+	"github.com/libgit2/git2go"
 	"io/ioutil"
 	"log"
 	"os"
@@ -538,4 +538,53 @@ func (gs *GitStorage) DiffPage(page *Page, revA, revB string) ([]string, error) 
 	}
 
 	return result, nil
+}
+
+func decodeStatus(status git.Status) (string, error) {
+	switch status {
+	case git.StatusIndexNew, git.StatusWtNew:
+		return "+", nil
+	case git.StatusIndexDeleted, git.StatusWtDeleted:
+		return "-", nil
+	case git.StatusIndexModified, git.StatusWtModified:
+		return "m", nil
+	case git.StatusIndexRenamed, git.StatusWtRenamed:
+		return "->", nil
+	case git.StatusIndexTypeChange, git.StatusWtTypeChange:
+		return "?!", nil
+	}
+
+	return "UNKNOWN", errors.New("Unknown status flag")
+}
+
+func (gs *GitStorage) GetStatus() error {
+	opts := &git.StatusOptions{}
+	opts.Show = git.StatusShowIndexAndWorkdir
+	opts.Flags = git.StatusOptIncludeUntracked | git.StatusOptRenamesHeadToIndex | git.StatusOptSortCaseSensitively
+
+	statusList, err := gs.r.StatusList(opts)
+	if err != nil {
+		return err
+	}
+
+	count, err := statusList.EntryCount()
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < count; i++ {
+		entry, err := statusList.ByIndex(i)
+		if err != nil {
+			return err
+		}
+
+		statusTxt, err := decodeStatus(entry.Status)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s old:%s new:%s [head]\n", statusTxt, entry.HeadToIndex.OldFile.Path, entry.HeadToIndex.NewFile.Path)
+		fmt.Printf("%s old:%s new:%s [head]\n\n", statusTxt, entry.IndexToWorkdir.OldFile.Path, entry.IndexToWorkdir.NewFile.Path)
+	}
+
+	return nil
 }

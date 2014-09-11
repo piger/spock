@@ -106,6 +106,12 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 	ctx["render_time"] = time.Since(renderStart)
 	ctx["alerts"] = GetAlerts(r, w)
 
+	// TEST
+	err = r.Ctx.Storage.GetStatus()
+	if err != nil {
+		log.Printf("error git status: %s\n", err)
+	}
+
 	r.Ctx.RenderTemplate("page.html", ctx, w)
 }
 
