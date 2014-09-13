@@ -34,10 +34,10 @@
 
         <div class="collapse navbar-collapse" id="navbar-menu">
           <ul class="nav navbar-nav">
-            <li><a href="/ls">All wiki pages</a></li>
+            <li><a href="{{reverse "list_pages"}}">All wiki pages</a></li>
           </ul>
 
-          <form class="navbar-form navbar-left" role="search" method="post" action="/search">
+          <form class="navbar-form navbar-left" role="search" method="post" action="{{reverse "search_pages"}}">
             <div class="form-group">
               <input type="text" name="q" class="form-control" placeholder="Insert query..." {{if .SearchQuery}}value="{{.SearchQuery}}"{{end}}>
             </div>
@@ -63,7 +63,9 @@
 
     </nav>
 
-    {{template "content" .}}
+    <div class="container">
+      {{template "content" .}}
+    </div>
 
     <script src="/static/js/jquery-1.11.1.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>

@@ -1,51 +1,49 @@
 {{define "content"}}
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12">
+<div class="row">
+  <div class="col-md-12">
 
-      {{template "pageHeader" .}}
+    {{template "pageHeader" .}}
 
-      {{template "pageBar" .pageName}}
+    {{template "pageBar" .pageName}}
 
-      <h2>Log for {{.pageName}}</h2>
+    <h2>Log for {{.pageName}}</h2>
 
-      <form action="" method="get" role="form">
-        <input type="hidden" name="diff" value="1">
+    <form action="" method="get" role="form">
+      <input type="hidden" name="diff" value="1">
 
-        <button type="submit" class="btn btn-primary">Diff</button>
-        <table class="table">
-          <thead>
+      <button type="submit" class="btn btn-primary">Diff</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Old</th>
+            <th>New</th>
+            <th>Author</th>
+            <th>Info</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {{range $i, $e := .details}}
             <tr>
-              <th>Old</th>
-              <th>New</th>
-              <th>Author</th>
-              <th>Info</th>
+              <td><label class="block"><input type="radio" name="oldrev" value="{{.sha}}" {{if eq $i 0}}checked{{end}}></label></td>
+              <td><label class="block"><input type="radio" name="newrev" value="{{.sha}}" {{if eq $i 1}}checked{{end}}></label></td>
+              <td><img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .email}}?s=32" alt="{{.AuthorEmail}}">{{.name}}</td>
+              <td>
+                {{if eq $i 0}}<h4 class="media-heading">{{.sha}} {{if eq $i 0 }}(current){{end}}</h4>
+                {{else}}
+                <h4 class="media-heading"><a href="?diff={{.sha}}">{{.sha}}</a></h4>
+                {{end}}
+                <h5>{{formatDatetime .when "Mon Jan 2 15:04 2006"}}</h5>
+                <pre>{{.message}}</pre>
+              </td>
             </tr>
-          </thead>
+            {{end}}
+        </tbody>
+      </table>
+    </form>
 
-          <tbody>
-
-            {{range $i, $e := .details}}
-              <tr>
-                <td><label class="block"><input type="radio" name="oldrev" value="{{.sha}}"></label></td>
-                <td><label class="block"><input type="radio" name="newrev" value="{{.sha}}"></label></td>
-                <td><img class="media-object" src="http://www.gravatar.com/avatar/{{gravatarHash .email}}?s=32" alt="{{.AuthorEmail}}">{{.name}}</td>
-                <td>
-                  {{if eq $i 0}}<h4 class="media-heading">{{.sha}} {{if eq $i 0 }}(current){{end}}</h4>
-                  {{else}}
-                  <h4 class="media-heading"><a href="?diff={{.sha}}">{{.sha}}</a></h4>
-                  {{end}}
-                  <h5>{{formatDatetime .when "Mon Jan 2 15:04 2006"}}</h5>
-                  <pre>{{.message}}</pre>
-                </td>
-              </tr>
-              {{end}}
-          </tbody>
-        </table>
-      </form>
-
-    </div>
   </div>
 </div>
 

@@ -1,31 +1,24 @@
 {{define "content"}}
 
-<div class="container">
+<div class="row">
 
-  <div class="row">
+  <div class="col-md-12">
 
-    <div class="col-md-12">
+    {{template "pageHeader" .}}
 
-      {{template "pageHeader" .}}
+    <h2>Results</h2>
 
-      <h2>Results</h2>
+    <h3>{{.results.Total}} matches <small>showing first 100</small></h3>
 
-      {{if .Suggestion}}
-      <p>Did you mean: <a href="/search?q={{urlquery .Suggestion}}">{{.Suggestion}}</a>?</p>
-      {{end}}
+    {{range .results.Results}}
+      <div class="search-result">
+        <a href="{{reverse "show_page" "pagepath" .Title}}">{{.Title}}</a>
+        <pre>{{.Highlight}}</pre>
+      </div>
+    {{end}}
 
-      <h3>{{.results.Total}} matches</h3>
+  </div><!-- /.col -->
 
-      {{range .results.Results}}
-        <div class="search-result">
-          <a href="/{{.Title}}">{{.Title}}</a>
-          <pre>{{.Highlight}}</pre>
-        </div>
-      {{end}}
+</div><!-- /.row -->
 
-    </div><!-- /.col -->
-
-  </div><!-- /.row -->
-
-</div><!-- /.container -->
 {{end}}

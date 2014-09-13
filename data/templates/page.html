@@ -1,27 +1,25 @@
 {{define "content"}}
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12">
+<div class="row">
+  <div class="col-md-12">
 
-      {{template "pageHeader" .}}
+    {{template "pageHeader" .}}
 
-      {{template "pageBar" .page.ShortName}}
+    {{template "pageBar" .page.ShortName}}
 
-      <div id="content">{{.content}}</div>
-    </div>
+    <div id="content">{{.content}}</div>
   </div>
+</div>
 
-  <!-- footer -->
-  <hr>
+<!-- footer -->
+<hr>
 
-  <div id="footer" class="row">
+<div id="footer" class="row">
 
-    <div class="col-md-12">
-      <p><small>Generated in {{.render_time}}.</small></p>
-    </div><!-- /.col -->
+  <div class="col-md-12">
+    <p><small>Generated in {{.render_time}}.</small></p>
+  </div><!-- /.col -->
 
-  </div><!-- /.footer -->
-</div><!-- /.container -->
+</div><!-- /.footer -->
 
 {{end}}

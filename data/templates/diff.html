@@ -1,24 +1,22 @@
 {{define "content"}}
 
-<div class="container">
-  <div class="row">
+<div class="row">
 
-    <div class="col-md-12">
+  <div class="col-md-12">
 
-      {{template "pageHeader" .}}
+    {{template "pageHeader" .}}
 
-      {{template "pageBar" .pageName}}
+    {{template "pageBar" .pageName}}
 
-      <h2>Diff</h2>
+    <h2>Diff</h2>
 
-      {{range .Diffs}}
+    {{range .Diffs}}
       <div class="diff-block">
         <pre><code class="patch">{{.}}</code></pre>
       </div>
-      {{end}}
+    {{end}}
 
-    </div><!-- /.col -->
-  </div><!-- /.row -->
+  </div><!-- /.col -->
+</div><!-- /.row -->
 
-</div><!-- /.container -->
 {{end}}
