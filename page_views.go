@@ -491,8 +491,8 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 	}
 
 	vars := mux.Vars(r.Request)
-	oldRev, ok1 := vars["oldrev"]
-	newRev, ok2 := vars["newrev"]
+	oldRev, ok1 := vars["startrev"]
+	newRev, ok2 := vars["endrev"]
 
 	if !ok1 || !ok2 {
 		http.Error(w, "Invalid parameters", http.StatusBadRequest)
@@ -504,7 +504,7 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	diffs, err := r.Ctx.Storage.DiffPage(page, oldRev, newRev)
+	diffs, err := r.Ctx.Storage.DiffPage(page, newRev, oldRev)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

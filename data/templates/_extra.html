@@ -1,10 +1,10 @@
 {{define "pageBar"}}
 <div class="btn-group">
   <a class="btn btn-xs btn-info" href="{{ reverse "show_page" "pagepath" . }}">/{{.}}</a>
-  <a class="btn btn-xs btn-default" href="?edit=1">edit</a>
-  <a class="btn btn-xs btn-default" href="?rename=1">rename</a></span>
-  <a class="btn btn-xs btn-default" href="?log=1">log</a></span>
-  <a class="btn btn-xs btn-warning" href="?delete=1">delete</a></span>
+  <a class="btn btn-xs btn-default" href="?action=edit">edit</a>
+  <a class="btn btn-xs btn-default" href="?action=rename">rename</a></span>
+  <a class="btn btn-xs btn-default" href="?action=log">log</a></span>
+  <a class="btn btn-xs btn-warning" href="?action=delete">delete</a></span>
 </div>
 {{end}}
 
@@ -15,16 +15,14 @@
 {{end}}
 
 {{define "breadcrumbs"}}
-{{if .}}
 <ol class="breadcrumb">
   {{range .}}
     <li><a href="{{ reverse "show_page" "pagepath" . }}">{{.}}</a></li>
   {{end}}
 </ol>
 {{end}}
-{{end}}
 
 {{define "pageHeader"}}
-{{template "breadcrumbs" .breadcrumbs}}
-{{template "alerts" .alerts}}
+{{if .breadcrumbs}}{{template "breadcrumbs" .breadcrumbs}}{{end}}
+{{if .alerts}}{{template "alerts" .alerts}}{{end}}
 {{end}}

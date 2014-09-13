@@ -307,14 +307,14 @@ func RunServer(address string, ac *AppContext) error {
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
 	r.Handle("/search", WithRequest(ac, vHandlerFunc(SearchPages))).Name("search_pages")
 
-	pagePattern := "/{pagepath:[a-zA-Z0-9_/.-]+}"
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(EditPage))).Queries("edit", "1").Name("edit_page")
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("log", "1").Name("show_log")
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("rename", "1").Name("rename_page")
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DeletePage))).Queries("delete", "1").Name("delete_page")
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("diff", "1", "oldrev", "{oldrev:[a-zA-Z0-9]{40}}", "newrev", "{newrev:[a-zA-Z0-9]{40}}").Name("diff_page")
+	pp := "/{pagepath:[a-zA-Z0-9_/.-]+}"
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(EditPage))).Queries("action", "edit").Name("edit_page")
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("action", "log").Name("show_log")
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("action", "rename").Name("rename_page")
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(DeletePage))).Queries("action", "delete").Name("delete_page")
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("action", "diff", "startrev", "{startrev:[a-zA-Z0-9]{40}}", "endrev", "{endrev:[a-zA-Z0-9]{40}}").Name("diff_page")
 
-	r.Handle(pagePattern, WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
 	http.Handle("/", r)
 
 	fmt.Printf("Wiki running on http://%s\n", address)
