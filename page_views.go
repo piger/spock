@@ -456,6 +456,12 @@ func DeletePage(w http.ResponseWriter, r *vRequest) {
 			return
 		}
 
+		if err = r.Ctx.Index.DeletePage(page); err != nil {
+			AddAlert(fmt.Sprintf("bleve: Cannot delete document %s from index %s: %s\n", page.Path, err), "warning", r)
+			log.Printf("Error removing document %s from index: %s\n", page, err)
+			r.Session.Save(r.Request, w)
+		}
+
 		http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
 		return
 	}
