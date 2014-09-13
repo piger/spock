@@ -4,6 +4,8 @@
 
 package spock
 
+// Abstract interface to a VCS used as a wiki storage.
+
 import (
 	"time"
 )
@@ -15,9 +17,6 @@ var PAGE_EXTENSIONS = []string{"md", "rst", "txt"}
 type Storage interface {
 	// Lookup a single Page
 	LookupPage(pagepath string) (*Page, bool, error)
-
-	// Save the changes in a Page content. XXX deprecated?
-	CommitFile(path string, signature *CommitSignature, message string) (RevID, error)
 
 	// CRUD
 	RenamePage(origPath, destPath string, signature *CommitSignature, message string) (RevID, error)
@@ -46,6 +45,7 @@ type CommitLog struct {
 	When    time.Time
 }
 
+// The struct used when creating a new commit
 type CommitSignature struct {
 	Name  string
 	Email string
