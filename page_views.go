@@ -18,15 +18,16 @@ import (
 )
 
 const (
-	ANONYMOUS_NAME  = "Anonymous"
-	ANONYMOUS_EMAIL = "anon@wiki.int"
+	anonymousName  = "Anonymous"
+	anonymousEmail = "anon@wiki.int"
+	maxBreadcrumbs = 10
 )
 
-type Breadcrumbs struct {
+type breadcrumbs struct {
 	Pages []string
 }
 
-func (b *Breadcrumbs) Add(wikiPath string) {
+func (b *breadcrumbs) Add(wikiPath string) {
 	if len := len(b.Pages); len > 0 {
 		last := b.Pages[len-1]
 		if last == wikiPath {
@@ -35,7 +36,7 @@ func (b *Breadcrumbs) Add(wikiPath string) {
 	}
 
 	b.Pages = append(b.Pages, wikiPath)
-	numPages := len(b.Pages) - 5
+	numPages := len(b.Pages) - maxBreadcrumbs
 	if numPages < 0 {
 		numPages = 0
 	}
@@ -43,13 +44,13 @@ func (b *Breadcrumbs) Add(wikiPath string) {
 }
 
 func init() {
-	gob.Register(&Breadcrumbs{})
+	gob.Register(&breadcrumbs{})
 }
 
 func updateBreadcrumbs(w http.ResponseWriter, r *vRequest, page *Page) []string {
-	bcrumbs, ok := r.Session.Values["breadcrumbs"].(*Breadcrumbs)
+	bcrumbs, ok := r.Session.Values["breadcrumbs"].(*breadcrumbs)
 	if !ok {
-		bcrumbs = &Breadcrumbs{}
+		bcrumbs = &breadcrumbs{}
 		r.Session.Values["breadcrumbs"] = bcrumbs
 	}
 	bcrumbs.Add(page.ShortName())
@@ -59,7 +60,7 @@ func updateBreadcrumbs(w http.ResponseWriter, r *vRequest, page *Page) []string 
 }
 
 func getBreadcrumbs(r *vRequest) []string {
-	if bcrumbs, ok := r.Session.Values["breadcrumbs"].(*Breadcrumbs); ok {
+	if bcrumbs, ok := r.Session.Values["breadcrumbs"].(*breadcrumbs); ok {
 		return bcrumbs.Pages
 	}
 
@@ -222,13 +223,13 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 func LookupAuthor(r *vRequest) (fullname, email string) {
 	if ifullname, ok := r.Session.Values["name"]; !ok {
-		fullname = ANONYMOUS_NAME
+		fullname = anonymousName
 	} else {
 		fullname = ifullname.(string)
 	}
 
 	if iemail, ok := r.Session.Values["email"]; !ok {
-		email = ANONYMOUS_EMAIL
+		email = anonymousEmail
 	} else {
 		email = iemail.(string)
 	}
