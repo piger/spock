@@ -103,9 +103,9 @@ func UserFromSession(session *sessions.Session) *User {
 type AppContext struct {
 	SessionStore sessions.Store
 	Storage      Storage
+	Router       *mux.Router
 	Templates    map[string]*template.Template
 	XsrfSecret   string
-	IndexSrv     string
 	Index        Index
 }
 
@@ -298,12 +298,14 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 func RunServer(address string, ac *AppContext) error {
 	r := mux.NewRouter()
 	ac.Templates = loadTemplates(r)
+	ac.Router = r
 
 	SetupStaticRoute(staticPrefix, filepath.Join(DataDir, "static"))
 
 	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexRedirect))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
 	r.Handle("/logout", WithRequest(ac, vHandlerFunc(Logout))).Name("logout")
+	r.Handle("/ls", WithRequest(ac, vHandlerFunc(IndexAllPages))).Queries("action", "index")
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
 	r.Handle("/search", WithRequest(ac, vHandlerFunc(SearchPages))).Name("search_pages")
 

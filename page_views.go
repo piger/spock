@@ -282,6 +282,7 @@ func ListPages(w http.ResponseWriter, r *vRequest) {
 	ctx := newTemplateContext(r)
 	ctx["pages"] = pages
 	ctx["breadcrumbs"] = getBreadcrumbs(r)
+	ctx["alerts"] = GetAlerts(r, w)
 
 	r.Ctx.RenderTemplate("ls.html", ctx, w)
 }
@@ -455,7 +456,7 @@ func DeletePage(w http.ResponseWriter, r *vRequest) {
 		}
 
 		if err = r.Ctx.Index.DeletePage(page); err != nil {
-			AddAlert(fmt.Sprintf("bleve: Cannot delete document %s from index %s: %s\n", page.Path, err), "warning", r)
+			AddAlert(fmt.Sprintf("bleve: Cannot delete document %s from index: %s\n", page.Path, err), "warning", r)
 			log.Printf("Error removing document %s from index: %s\n", page, err)
 			r.Session.Save(r.Request, w)
 		}
@@ -515,4 +516,22 @@ func DiffPage(w http.ResponseWriter, r *vRequest) {
 	ctx["breadcrumbs"] = getBreadcrumbs(r)
 
 	r.Ctx.RenderTemplate("diff.html", ctx, w)
+}
+
+func IndexAllPages(w http.ResponseWriter, r *vRequest) {
+	err := r.Ctx.Index.IndexWiki(r.Ctx.Storage)
+	if err != nil {
+		AddAlert(fmt.Sprintf("Error indexing wiki: %s", err), "error", r)
+	} else {
+		AddAlert("Wiki indexed", "success", r)
+	}
+	r.Session.Save(r.Request, w)
+	rurl := r.Ctx.Router.GetRoute("list_pages")
+	url, err := rurl.URL()
+	if err != nil {
+		log.Printf("Error getting route for list_pages: %s\n", err)
+		http.Redirect(w, r.Request, "/", http.StatusFound)
+		return
+	}
+	http.Redirect(w, r.Request, url.Path, http.StatusFound)
 }
