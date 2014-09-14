@@ -6,8 +6,10 @@ package spock
 
 import (
 	"github.com/blevesearch/bleve"
+	bleveDocument "github.com/blevesearch/bleve/document"
 	"log"
 	"path/filepath"
+	"time"
 )
 
 const (
@@ -20,10 +22,11 @@ const (
 )
 
 type WikiPage struct {
-	Title  string `json:"title"`
-	BodyEn string `json:"body_en"`
-	BodyIt string `json:"body_it"`
-	Body   string `json:"body"`
+	Title  string    `json:"title"`
+	BodyEn string    `json:"body_en"`
+	BodyIt string    `json:"body_it"`
+	Body   string    `json:"body"`
+	Mtime  time.Time `json:"mtime"`
 }
 
 func (wp *WikiPage) Type() string {
@@ -46,12 +49,15 @@ func buildIndexMapping() *bleve.IndexMapping {
 	stdTextMapping := bleve.NewTextFieldMapping()
 	stdTextMapping.Analyzer = textAnalyzer
 
+	dtMapping := bleve.NewDateTimeFieldMapping()
+
 	wikiPageMapping := bleve.NewDocumentMapping()
 	wikiPageMapping.AddFieldMappingsAt("title", stdTextMapping)
 	wikiPageMapping.AddSubDocumentMapping("id", bleve.NewDocumentDisabledMapping())
 	wikiPageMapping.AddFieldMappingsAt("body_en", enTextMapping)
 	wikiPageMapping.AddFieldMappingsAt("body_it", itTextMapping)
 	wikiPageMapping.AddFieldMappingsAt("body", stdTextMapping)
+	wikiPageMapping.AddFieldMappingsAt("mtime", dtMapping)
 
 	mapping := bleve.NewIndexMapping()
 	mapping.AddDocumentMapping("wikiPage", wikiPageMapping)
@@ -116,6 +122,27 @@ func (idx *Index) IndexWiki(storage Storage) error {
 			continue
 		}
 
+		// try to skip already indexed documents by checking the mtime
+		doc, err := idx.index.Document(page.ShortName())
+		if err != nil {
+			log.Printf("error getting document %s from index: %s\n", page.ShortName(), err)
+		} else if doc != nil {
+			for _, field := range doc.Fields {
+				if field.Name() != "mtime" {
+					continue
+				}
+				if dtfield, ok := field.(*bleveDocument.DateTimeField); ok {
+					if dt, err := dtfield.DateTime(); err == nil {
+						if dt.Equal(page.Mtime) || dt.After(page.Mtime) {
+							continue
+						} else {
+							log.Printf("Reindexing \"%s\"\n", page.ShortName())
+						}
+					}
+				}
+			}
+		}
+
 		wikiPage, err := page.ToWikiPage()
 		if err != nil {
 			log.Printf("Error converting page %s for indexing: %s\n", page.ShortName(), err)
@@ -139,13 +166,16 @@ func (page *Page) ToWikiPage() (*WikiPage, error) {
 		return nil, err
 	}
 	body := string(text)
+	wp := &WikiPage{Title: page.ShortName(), Mtime: page.Mtime}
 
 	if page.Header.Language == "it" {
-		return &WikiPage{Title: page.ShortName(), BodyIt: body}, nil
+		wp.BodyIt = body
 	} else if page.Header.Language == "en" {
-		return &WikiPage{Title: page.ShortName(), BodyEn: body}, nil
+		wp.BodyEn = body
+	} else {
+		wp.Body = body
 	}
-	return &WikiPage{Title: page.ShortName(), Body: body}, nil
+	return wp, nil
 }
 
 func (ac *AppContext) Search(searchQuery string, size, from int) (*bleve.SearchResult, error) {

@@ -21,6 +21,7 @@ var (
 	dataDir  = flag.String("datadir", "./data", "Path to the data directory")
 	initRepo = flag.Bool("init", false, "Initialize a new repository")
 	cfgFile  = flag.String("config", "./cfg_spock.json", "Path to the configuration file")
+	reIndex  = flag.Bool("reindex", false, "Reindex the wiki")
 )
 
 func makeAbs(p string) string {
@@ -57,7 +58,7 @@ func main() {
 
 	// If we are opening an existing repository and the index is empty we
 	// run an initial indexing of the whole repository content.
-	if index.DocCount() == 0 && !*initRepo {
+	if (index.DocCount() == 0 && !*initRepo) || *reIndex {
 		go func() {
 			log.Printf("New index: Indexing all pages\n")
 			err = index.IndexWiki(storage)

@@ -173,9 +173,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			fullname, email := LookupAuthor(r)
 
 			// Update page RawBytes, header and content with the new data.
-			page.RawBytes = []byte(content)
-			page.Header, page.Content, err = ParsePageBytes(page.RawBytes)
-			if err != nil {
+			if err := page.SetRawBytes([]byte(content)); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}

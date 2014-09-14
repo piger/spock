@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // rst2html program path
@@ -63,6 +64,7 @@ type Page struct {
 	Header   *PageHeader
 	RawBytes []byte
 	Content  []byte
+	Mtime    time.Time
 }
 
 // NewPage is the preferred way to create new Page objects.
@@ -114,6 +116,10 @@ func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
 
 // LoadPage loads a page from the filesystem.
 func LoadPage(path, relpath string) (*Page, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -125,6 +131,7 @@ func LoadPage(path, relpath string) (*Page, error) {
 
 	page := NewPage(relpath)
 	page.RawBytes = data
+	page.Mtime = fi.ModTime()
 
 	page.Header, page.Content, err = ParsePageBytes(data)
 	if err != nil {
@@ -132,6 +139,15 @@ func LoadPage(path, relpath string) (*Page, error) {
 	}
 
 	return page, nil
+}
+
+func (page *Page) SetRawBytes(content []byte) (err error) {
+	page.RawBytes = content
+	page.Header, page.Content, err = ParsePageBytes(page.RawBytes)
+	if err != nil {
+		page.Mtime = time.Now()
+	}
+	return err
 }
 
 // ShortenPageName returns the filename without the extension.
