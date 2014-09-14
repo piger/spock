@@ -11,6 +11,7 @@ import (
 	"github.com/piger/spock"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
 )
 
@@ -50,6 +51,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// FIXME: there should be a better way to ensure that the index is closed
+	// e.g. log.Fatal() skip defers...
 	defer index.Close()
 
 	// If we are opening an existing repository and the index is empty we
@@ -86,8 +89,17 @@ func main() {
 	// XXX this is really ugly
 	spock.DataDir = makeAbs(*dataDir)
 
-	err = spock.RunServer(*address, appCtx)
-	if err != nil {
-		log.Fatal(err)
+	csig := make(chan os.Signal, 1)
+	errsig := make(chan error, 1)
+	signal.Notify(csig, os.Interrupt)
+	go func() {
+		errsig <- spock.RunServer(*address, appCtx)
+	}()
+
+	select {
+	case <-csig:
+		log.Printf("Exiting\n")
+	case err := <-errsig:
+		log.Println(err)
 	}
 }
