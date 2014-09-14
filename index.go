@@ -23,6 +23,7 @@ type WikiPage struct {
 	Title  string `json:"title"`
 	BodyEn string `json:"body_en"`
 	BodyIt string `json:"body_it"`
+	Body   string `json:"body"`
 }
 
 func (wp *WikiPage) Type() string {
@@ -50,6 +51,7 @@ func buildIndexMapping() *bleve.IndexMapping {
 	wikiPageMapping.AddSubDocumentMapping("id", bleve.NewDocumentDisabledMapping())
 	wikiPageMapping.AddFieldMappingsAt("body_en", enTextMapping)
 	wikiPageMapping.AddFieldMappingsAt("body_it", itTextMapping)
+	wikiPageMapping.AddFieldMappingsAt("body", stdTextMapping)
 
 	mapping := bleve.NewIndexMapping()
 	mapping.AddDocumentMapping("wikiPage", wikiPageMapping)
@@ -140,16 +142,20 @@ func (page *Page) ToWikiPage() (*WikiPage, error) {
 
 	if page.Header.Language == "it" {
 		return &WikiPage{Title: page.ShortName(), BodyIt: body}, nil
+	} else if page.Header.Language == "en" {
+		return &WikiPage{Title: page.ShortName(), BodyEn: body}, nil
 	}
-	return &WikiPage{Title: page.ShortName(), BodyEn: body}, nil
+	return &WikiPage{Title: page.ShortName(), Body: body}, nil
 }
 
-func (ac *AppContext) Search(searchQuery string) (*bleve.SearchResult, error) {
+func (ac *AppContext) Search(searchQuery string, size, from int) (*bleve.SearchResult, error) {
 	// query := bleve.NewQueryStringQuery(searchQuery)
 	queryEn := bleve.NewMatchQuery(searchQuery).SetField("body_en")
 	queryIt := bleve.NewMatchQuery(searchQuery).SetField("body_it")
+	queryStd := bleve.NewMatchQuery(searchQuery).SetField("body")
 	queryTitle := bleve.NewMatchQuery(searchQuery).SetField("title")
-	query := bleve.NewDisjunctionQuery([]bleve.Query{queryEn, queryIt, queryTitle})
+	query := bleve.NewDisjunctionQuery([]bleve.Query{queryEn, queryIt, queryStd, queryTitle})
+
 	req := bleve.NewSearchRequestOptions(query, 100, 0, false)
 	req.Highlight = bleve.NewHighlight()
 	return ac.Index.index.Search(req)

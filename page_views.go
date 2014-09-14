@@ -387,7 +387,7 @@ func SearchPages(w http.ResponseWriter, r *vRequest) {
 		return
 	}
 
-	result, err := r.Ctx.Search(query)
+	result, err := r.Ctx.Search(query, 100, 0)
 	if err != nil {
 		log.Printf("Search error: %s\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
