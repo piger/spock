@@ -10,7 +10,11 @@
 
 {{define "alerts"}}
 {{range .}}
-  <div class="alert alert-{{.Level}}">{{.Message}}</div>
+  <div class="alert alert-{{.Level}} alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span>
+      <span class="sr-only">Close</span></button>
+    {{.Message}}
+  </div>
 {{end}}
 {{end}}
 
