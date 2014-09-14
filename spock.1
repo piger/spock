@@ -44,6 +44,9 @@ port (\fI:8080\fR).
 .BR \-datadir =\fIDIR\fR
 Set the path to the directory containing the templates and all the other
 static resources.
+.TP
+.BR \-reindex
+Refresh the full-text search index on program startup.
 .SH CONFIGURATION FILE
 The configuration file is a \fIJSON\fR document; inside it you must specify
 at least the \fBsecret key\fR, which is used to protect session cookies and
