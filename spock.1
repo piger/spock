@@ -1,11 +1,11 @@
 .TH SPOCK 1 "SEPTEMBER 2014" "spock 0.4.0" "Spock Manual"
-.SH NAME
+.SH "NAME"
 Spock \- a simple Markdown-powered wiki engine
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 .B spock
 [\-help] [\-config=<file>] [\-address=<address>] [\-init]
       [\-datadir=<path>] \-repo=<path>
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 \fBSpock\fR is a simple wiki engine heavily inspired by GitHub's Gollum and is
 mostly intended as a personal documentation system. Wiki pages can be written
 in \fIMarkdown\fR and \fIRestructuredText\fR, although the former is the
@@ -23,7 +23,7 @@ Some Markdown extensions are supported:
 .B Autolinking
 .IP \[bu]
 .B Strikethrough
-.SH OPTIONS
+.SH "OPTIONS"
 .TP
 .BR \-config =\fIFILE\fR
 Use the configuration file specified by \fBFILE\fR.
@@ -47,7 +47,7 @@ static resources.
 .TP
 .BR \-reindex
 Refresh the full-text search index on program startup.
-.SH CONFIGURATION FILE
+.SH "CONFIGURATION FILE"
 The configuration file is a \fIJSON\fR document; inside it you must specify
 at least the \fBsecret key\fR, which is used to protect session cookies and
 other stuff.
@@ -67,7 +67,7 @@ To create a \fIsecret_key\fR you can use a password and \fBmd5sum\fR, for exampl
 $ echo \-n "my long password" | md5sum
 .RS 0
 2b2fc5cc5e1a6ceba39328a9f8659ca5
-.SH WIKI PAGES
+.SH "WIKI PAGES"
 A wiki page can link to one or more wiki pages; links can be absolute o relative
 to the current \fIwiki directory\fR. An example link in \fIMarkdown\fR format
 to the \fBDebian\fR page can be written as:
@@ -100,7 +100,7 @@ extensions are used to identify the markup of a page (e.g. \fB.rst\fR and
 The \fBlanguage\fR property is used to specify the language in which a page
 is written, to aid the full-text search. Currently only \fIItalian\fR and
 \fIEnglish\fR languages are supported.
-.SH FILES
+.SH "FILES"
 .TP
 .BR rst_template.txt
 Is the template used to render the HTML from a \fIrst\fR document. See also
@@ -108,10 +108,10 @@ Is the template used to render the HTML from a \fIrst\fR document. See also
 .TP
 .BR templates/
 All the \fIHTML\fR templates used to render the wiki pages are stored here.
-.SH AUTHOR
+.SH "AUTHOR"
 \fBSpock\fR is written by Daniel Kertesz <\fBdaniel@spatof.org\fR> but it could
 not have been possible without the authors of the third-party libraries; you
 can find more informations in the \fBAUTHORS\fR file.
-.SH SEE ALSO
+.SH "SEE ALSO"
 Gollum \fBhttps://github.com/gollum/gollum\fR, \fBrst2html(1)\fR,
 \fBblackfriday\fR markdown renderer \fBhttps://github.com/russross/blackfriday\fR.
