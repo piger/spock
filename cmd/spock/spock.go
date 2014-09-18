@@ -18,7 +18,6 @@ import (
 var (
 	address  = flag.String("address", "127.0.0.1:8080", "Bind address")
 	repoDir  = flag.String("repo", "", "Path to the git repository")
-	dataDir  = flag.String("datadir", "./data", "Path to the data directory")
 	initRepo = flag.Bool("init", false, "Initialize a new repository")
 	cfgFile  = flag.String("config", "./cfg_spock.json", "Path to the configuration file")
 	reIndex  = flag.Bool("reindex", false, "Reindex the wiki")
@@ -86,9 +85,6 @@ func main() {
 		Storage:      storage,
 		Index:        *index,
 	}
-
-	// XXX this is really ugly
-	spock.DataDir = makeAbs(*dataDir)
 
 	csig := make(chan os.Signal, 1)
 	errsig := make(chan error, 1)
