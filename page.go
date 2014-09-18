@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -38,6 +37,11 @@ My first paragraph.
 const (
 	markdownName = "markdown"
 	rstName      = "rst"
+)
+
+var (
+	htmlBodyStart = []byte("<body>")
+	htmlBodyEnd   = []byte("</body>")
 )
 
 func init() {
@@ -260,18 +264,28 @@ func lookupRst() (string, error) {
 }
 
 func renderRst(content []byte) ([]byte, error) {
-	rstTemplate := filepath.Join(DataDir, "rst_template.txt")
-	cmd := exec.Command(rst2htmlPath, "--template", rstTemplate)
-	cmd.Stdin = strings.NewReader(string(content))
+	cmd := exec.Command(rst2htmlPath)
+	cmd.Stdin = bytes.NewReader(content)
 	var out, errout bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &errout
 	err := cmd.Run()
 
-	errStr := string(errout.Bytes())
+	errStr := errout.String()
 	if len(errStr) > 0 {
 		fmt.Print(errStr)
 	}
 
-	return out.Bytes(), err
+	html := out.Bytes()
+	bs := bytes.Index(html, htmlBodyStart)
+	if bs == -1 {
+		return nil, fmt.Errorf("Error rendering rst: cannot find <body> tag")
+	}
+	be := bytes.Index(html, htmlBodyEnd)
+	if be == -1 {
+		return nil, fmt.Errorf("Error rendering rst: cannot find </body> tag")
+	}
+
+	html = html[bs+len(htmlBodyStart) : be]
+	return html, err
 }
