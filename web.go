@@ -8,12 +8,12 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"html/template"
 	"log"
 	"net/http"
-	"path/filepath"
 	"sync"
 )
 
@@ -277,6 +277,11 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"reverse":        reverse,
 	}
 
+	templateBox, err := rice.FindBox("data/templates")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	templateNames := []string{
 		"edit_page.html",
 		"log.html",
@@ -290,9 +295,17 @@ func loadTemplates(router *mux.Router) map[string]*template.Template {
 		"welcome.html",
 	}
 	for _, tplName := range templateNames {
-		templates[tplName] = LoadTemplate(&funcMap, tplName)
+		templates[tplName] = LoadRiceTemplate(tplName, &funcMap, templateBox)
 	}
 	return templates
+}
+
+func LoadRiceTemplate(name string, funcMap *template.FuncMap, box *rice.Box) *template.Template {
+	tpl := box.MustBytes(name)
+	tpl = append(tpl, box.MustBytes("base.html")...)
+	tpl = append(tpl, box.MustBytes("_extra.html")...)
+	t := template.Must(template.New(name).Funcs(*funcMap).Parse(string(tpl)))
+	return t
 }
 
 func RunServer(address string, ac *AppContext) error {
@@ -300,7 +313,8 @@ func RunServer(address string, ac *AppContext) error {
 	ac.Templates = loadTemplates(r)
 	ac.Router = r
 
-	SetupStaticRoute(staticPrefix, filepath.Join(DataDir, "static"))
+	// SetupStaticRoute(staticPrefix, filepath.Join(DataDir, "static"))
+	http.Handle(staticPrefix, http.StripPrefix(staticPrefix, http.FileServer(rice.MustFindBox("data/static").HTTPBox())))
 
 	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexRedirect))).Name("index")
 	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")

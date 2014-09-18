@@ -15,22 +15,17 @@ export CGO_LDFLAGS := -L$(LIBICU_PATH)/lib
 export CGO_CFLAGS := -I$(LIBICU_PATH)/include
 endif
 
-GO_BINDATA := go-bindata
-GO_FILES := $(shell find . -name '*.go' \! -name static-data.go)
+GO_RICE := rice
+GO_FILES := $(shell find . -name '*.go')
 SPOCK_CMD := cmd/spock/spock.go
 
 all: spock
 
 spock: $(GO_FILES)
 	go build -tags "libstemmer icu leveldb" $(SPOCK_CMD)
-
-spock-bundle: static-data.go $(GO_FILES)
-	go build -tags "libstemmer icu leveldb bundle" $(SPOCK_CMD)
-
-static-data.go:
-	$(GO_BINDATA) -o static-data.go -pkg spock -tags bundle -ignore '~\z' -prefix data/ data/...
+	$(GO_RICE) append --exec spock
 
 static-data.tar.gz:
 	tar zcvf static-data.tar.gz data/
 
-.PHONY: static-data.go static-data.tar.gz spock-bundle
+.PHONY: static-data.tar.gz
