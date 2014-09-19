@@ -15,15 +15,19 @@ export CGO_LDFLAGS := -L$(LIBICU_PATH)/lib
 export CGO_CFLAGS := -I$(LIBICU_PATH)/include
 endif
 
-GO_RICE := rice
+GO_RICE := $(GOPATH)/bin/rice
 GO_FILES := $(shell find . -name '*.go')
 SPOCK_CMD := cmd/spock/spock.go
 
 all: spock
 
-spock: $(GO_FILES)
+spock: $(GO_FILES) $(GO_RICE)
 	go build -tags "libstemmer icu leveldb" $(SPOCK_CMD)
 	$(GO_RICE) append --exec spock
+
+$(GO_RICE):
+	go get github.com/GeertJohan/go.rice
+	go get github.com/GeertJohan/go.rice/rice
 
 static-data.tar.gz:
 	tar zcvf static-data.tar.gz data/
