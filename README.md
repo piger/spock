@@ -37,7 +37,7 @@ Typical usage:
 ./spock -repo ~/Documents/wiki
 ```
 
-## Building Spock
+## Installing Spock from sources
 
 Requirements:
 
@@ -88,16 +88,9 @@ make install
 
 **NOTE**: `make install` will only build `git2go`, statically linking [libgit2][libgit2]
 
-Now you can build Spock (you can safely omit `leveldb` if your system doesn't ship with an up to date version of the library):
-
-```bash
-go get -d -tags "libstemmer icu leveldb" github.com/piger/spock
-cd $GOPATH/src/github.com/piger/spock
-# On GNU/Linux:
-go build -tags "libstemmer icu leveldb" cmd/spock/spock.go
-# On OS X:
-./build-osx.sh
-```
+Now you can build Spock by running `make`; if you system doesn't ship with an updated
+version of `libleveldb` you can edit the `Makefile` and remove `leveldb` from the Go
+build tags.
 
 To render `RestructuredText` pages you will also need the `rst2html` program, included in [docutils][docutils] Python package; `rst2html` must be present in `$PATH`:
 

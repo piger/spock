@@ -41,10 +41,6 @@ Set the address and port where Spock will serve the wiki; \fBADDRESS\fR can
 specify both the listen address and port (\fI127.0.0.1:8080\fR) or just the
 port (\fI:8080\fR).
 .TP
-.BR \-datadir =\fIDIR\fR
-Set the path to the directory containing the templates and all the other
-static resources.
-.TP
 .BR \-reindex
 Refresh the full-text search index on program startup.
 .SH "CONFIGURATION FILE"
@@ -101,10 +97,6 @@ The \fBlanguage\fR property is used to specify the language in which a page
 is written, to aid the full-text search. Currently only \fIItalian\fR and
 \fIEnglish\fR languages are supported.
 .SH "FILES"
-.TP
-.BR rst_template.txt
-Is the template used to render the HTML from a \fIrst\fR document. See also
-\fBdocutils\fR and \fBrst2html\fR documentation.
 .TP
 .BR templates/
 All the \fIHTML\fR templates used to render the wiki pages are stored here.
