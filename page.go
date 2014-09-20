@@ -42,6 +42,7 @@ const (
 var (
 	htmlBodyStart = []byte("<body>")
 	htmlBodyEnd   = []byte("</body>")
+	headerTag     = []byte("---")
 )
 
 func init() {
@@ -82,10 +83,8 @@ func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
 	var content []byte
 	ph := &PageHeader{}
 
-	hdrtag := []byte("---")
-
 	// if the first bytes does not contain the YAML header
-	if string(data[0:3]) != string(hdrtag) {
+	if !bytes.Equal(data[0:len(headerTag)], headerTag) {
 		return ph, data, nil
 	} else {
 		// read and parse the YAML header
@@ -94,11 +93,11 @@ func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
 		// find the second yaml marker "---": we skip the first 3 bytes as we need to find
 		// the *second* row of "---"; after we have found the position we add back the 3
 		// bytes, to account for the first "---". Clear uh?
-		mark := bytes.Index(data[len(hdrtag):], hdrtag)
+		mark := bytes.Index(data[len(headerTag):], headerTag)
 		if mark == -1 {
 			return nil, content, errors.New("Cannot find the closing YAML marker")
 		}
-		mark += len(hdrtag)
+		mark += len(headerTag)
 
 		// cross-platform way to find the end of the line
 		eolMark := bytes.Index(data[mark:], []byte("\n"))
