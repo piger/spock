@@ -409,11 +409,7 @@ func (gs *GitStorage) ListPages() ([]string, error) {
 		// to avoid going into sibdirectories return 1
 		return 0
 	})
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
+	return result, err
 }
 
 // Return the git.Tree of the specified SHA id.
