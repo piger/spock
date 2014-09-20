@@ -435,81 +435,29 @@ func (gs *GitStorage) DiffPage(page *Page, revA, revB string) ([]string, error) 
 	// commit B
 	newTree, err := gs.treeFromId(revB)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 
 	// run git diff
 	diffopts, err := git.DefaultDiffOptions()
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
-
 	diff, err := gs.r.DiffTreeToTree(newTree, oldTree, &diffopts)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 
-	files := make([]string, 0)
-	hunks := make([]git.DiffHunk, 0)
-	lines := make([]git.DiffLine, 0)
-	err = diff.ForEach(func(file git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
-		var skip bool
-
-		if file.OldFile.Path != page.Path {
-			skip = true
-		}
-
-		if !skip {
-			files = append(files, file.OldFile.Path)
-		}
-		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
-			if !skip {
-				hunks = append(hunks, hunk)
-			}
-			return func(line git.DiffLine) error {
-				if !skip {
-					lines = append(lines, line)
-				}
-				return nil
-			}, nil
-		}, nil
-	}, git.DiffDetailLines)
-
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	// log.Print(files)
-	// log.Print(hunks)
-
-	for _, line := range lines {
-		if line.Origin == git.DiffLineAddition {
-			// fmt.Printf("+ %s", line.Content)
-		} else if line.Origin == git.DiffLineDeletion {
-			// fmt.Printf("- %s", line.Content)
-		} else if line.Origin == git.DiffLineContext {
-			// fmt.Println(line.Content)
-		}
-	}
-
-	// fmt.Printf("\n#########################################\n")
-
+	// we can't know in advance how many deltas are useful to us inside this diff.
 	result := make([]string, 0)
 
 	dlen, err := diff.NumDeltas()
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
-
 	for i := 0; i < dlen; i++ {
 		delta, err := diff.GetDelta(i)
 		if err != nil {
-			log.Print(err)
 			return nil, err
 		}
 
@@ -520,14 +468,10 @@ func (gs *GitStorage) DiffPage(page *Page, revA, revB string) ([]string, error) 
 
 		patch, err := diff.Patch(i)
 		if err != nil {
-			log.Print(err)
 			return nil, err
 		}
 		if patchStr, err := patch.String(); err == nil {
 			result = append(result, patchStr)
-
-			// fmt.Printf("%s\n", patchStr)
-			// fmt.Println("END OF PATCH")
 		} else {
 			fmt.Print(err)
 		}

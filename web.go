@@ -307,7 +307,6 @@ func RunServer(address string, ac *AppContext) error {
 	ac.Templates = loadTemplates(r)
 	ac.Router = r
 
-	// SetupStaticRoute(staticPrefix, filepath.Join(DataDir, "static"))
 	http.Handle(staticPrefix, http.StripPrefix(staticPrefix, http.FileServer(rice.MustFindBox("data/static").HTTPBox())))
 
 	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexRedirect))).Name("index")
