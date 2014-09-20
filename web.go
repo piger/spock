@@ -123,6 +123,8 @@ func (f vHandlerFunc) ServeHTTP(w http.ResponseWriter, r *vRequest) {
 func WithRequest(ac *AppContext, h vHandler) http.Handler {
 	sessionOpts := sessions.Options{
 		HttpOnly: true,
+		Path:     "/",
+		MaxAge:   86400 * 7, // 7 days
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
