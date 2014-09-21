@@ -21,6 +21,9 @@ override_dh_auto_configure:
 	cd $(GOPATH)/src/github.com/libgit2/git2go && git submodule update --init
 	$(MAKE) -C $(GOPATH)/src/github.com/libgit2/git2go install
 
+override_dh_auto_test:
+	cd $(GOPATH)/src/$(GO_PACKAGE) && go test ./...
+
 override_dh_install:
 	dh_install --sourcedir=$(GOPATH)/bin spock $(DESTDIR)/usr/bin
 	dh_install debian/cfg_spock.json $(DESTDIR)/etc/spock/
