@@ -26,8 +26,7 @@ var rst2htmlPath string
 var NewPageContent = `---
 title: "My page"
 description: "A brief page description..."
-tags: [ "general" ]
-language: "it"
+language: "en"
 ---
 # My document title
 
@@ -57,7 +56,6 @@ func init() {
 type PageHeader struct {
 	Title       string
 	Description string
-	Tags        []string
 	Language    string
 	Markup      string
 }
