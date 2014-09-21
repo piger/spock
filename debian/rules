@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+# export DH_OPTIONS=-v
+
+# the name of the package being built
+GO_PACKAGE=github.com/piger/spock
+
+# XXX GOPATH should be: $(CURDIR)/debian/go_build
+export GOPATH=$(CURDIR)/go_build
+
+
+%:
+	dh $@
+
+# git2go has his own funky build method
+override_dh_auto_configure:
+	go get -d -tags "libstemmer icu leveldb" $(GO_PACKAGE)
+	cd $(GOPATH)/src/github.com/libgit2/git2go && git submodule update --init
+	$(MAKE) -C $(GOPATH)/src/github.com/libgit2/git2go install
+
+override_dh_install:
+	dh_install --sourcedir=$(GOPATH)/bin spock $(DESTDIR)/usr/bin
+	dh_install debian/cfg_spock.json $(DESTDIR)/etc/spock/
+
+override_dh_clean:
+	rm -rf $(GOPATH)
+	dh_clean
+

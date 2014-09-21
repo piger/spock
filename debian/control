@@ -1,0 +1,23 @@
+Source: spock
+Section: net
+Priority: optional
+Maintainer: Daniel Kertesz <daniel@spatof.org>
+Build-Depends: debhelper (>= 9.0.0),
+               git-core,
+               mercurial,
+               cmake,
+               pkg-config,
+               golang-go,
+               libleveldb-dev (>= 1.15.0),
+               libicu-dev (>= 52.1)
+Standards-Version: 3.9.5
+Homepage: https://github.com/piger/spock
+Vcs-Git: https://github.com/piger/spock.git
+
+Package: spock
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libleveldb1 (>= 1.15.0), libicu52 (>= 52.1)
+Recommends: python-docutils
+Description: git-based wiki web application
+ Spock is a simple wiki software heavily inspired by GitHub's Gollum
+ and is mostly intended as a personal documentation system.

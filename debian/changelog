@@ -1,0 +1,5 @@
+spock (0.5.0) trusty; urgency=low
+
+  * Initial release.
+
+ -- Daniel Kertesz <daniel@spatof.org>  Sun, 21 Sep 2014 19:01:23 +0000

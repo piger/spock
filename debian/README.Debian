@@ -1,0 +1,8 @@
+spock for Debian
+----------------
+
+A sample configuration file was installed in /etc/spock. You must edit
+this file to set a secret key and remember to keep it formatted as a
+valid JSON document.
+
+ -- Daniel Kertesz <daniel@spatof.org>  Sun, 21 Sep 2014 20:35:47 +0000
