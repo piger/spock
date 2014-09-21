@@ -1,7 +1,4 @@
 # Spock GNU Makefile
-#
-# To build the "bundle" version you'll need `go-bindata`:
-# https://github.com/jteeuwen/go-bindata
 
 UNAME := $(shell uname)
 
