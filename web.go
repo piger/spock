@@ -14,12 +14,12 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"sync"
 )
 
 var (
-	sessionName  = "spock-session"
-	staticPrefix = "/static/"
+	sessionName     = "spock-session"
+	staticPrefix    = "/static/"
+	sessionDuration = 86400 * 7 // 7 days
 )
 
 // User is a representation of a wiki user.
@@ -35,40 +35,8 @@ type Alert struct {
 	Message string
 }
 
-// pageCache is a silly cache that will hold the rendered version of a wiki page.
-type pageCache struct {
-	lock        sync.RWMutex
-	PageRenders map[string][]byte
-}
-
-func (pc *pageCache) Get(path string) ([]byte, bool) {
-	pc.lock.RLock()
-	defer pc.lock.RUnlock()
-
-	page, ok := pc.PageRenders[path]
-	return page, ok
-}
-
-func (pc *pageCache) Set(path string, html []byte) {
-	pc.lock.RLock()
-	defer pc.lock.RUnlock()
-
-	pc.PageRenders[path] = html
-}
-
-func (pc *pageCache) Flush(path string) {
-	pc.lock.RLock()
-	defer pc.lock.RUnlock()
-
-	delete(pc.PageRenders, path)
-}
-
-// PageCache contains the rendering cache.
-var PageCache *pageCache
-
 func init() {
 	gob.Register(&Alert{})
-	PageCache = &pageCache{PageRenders: make(map[string][]byte)}
 }
 
 func UserFromSession(session *sessions.Session) *User {
@@ -124,7 +92,7 @@ func WithRequest(ac *AppContext, h vHandler) http.Handler {
 	sessionOpts := sessions.Options{
 		HttpOnly: true,
 		Path:     "/",
-		MaxAge:   86400 * 7, // 7 days
+		MaxAge:   sessionDuration,
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -198,51 +166,6 @@ func IndexRedirect(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	r.Ctx.RenderTemplate("welcome.html", ctx, w)
-}
-
-func Login(w http.ResponseWriter, r *vRequest) {
-	var error bool
-
-	if loggedIn, ok := r.Session.Values["logged_in"]; ok && loggedIn.(bool) {
-		http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
-		return
-	}
-
-	if r.Request.Method == "POST" {
-		if err := r.Request.ParseForm(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		name := r.Request.PostFormValue("name")
-		email := r.Request.PostFormValue("email")
-
-		if name != "" && email != "" {
-			r.Session.Values["logged_in"] = true
-			r.Session.Values["name"] = name
-			r.Session.Values["email"] = email
-			r.Session.Save(r.Request, w)
-			http.Redirect(w, r.Request, "/index", http.StatusSeeOther)
-			return
-		}
-
-		// else...
-		error = true
-	}
-
-	ctx := newTemplateContext(r)
-	ctx["error"] = error
-
-	r.Ctx.RenderTemplate("login.html", ctx, w)
-}
-
-func Logout(w http.ResponseWriter, r *vRequest) {
-	delete(r.Session.Values, "logged_in")
-	delete(r.Session.Values, "name")
-	delete(r.Session.Values, "email")
-	r.Session.Save(r.Request, w)
-
-	http.Redirect(w, r.Request, "/login", http.StatusSeeOther)
 }
 
 func loadTemplates(router *mux.Router) map[string]*template.Template {
