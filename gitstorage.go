@@ -33,7 +33,7 @@ func CreateGitStorage(path string) (*GitStorage, error) {
 // Open an existing git repository, optionally creating a new one if the
 // specified directory is not found and 'create' is true.
 func OpenGitStorage(path string, create bool) (*GitStorage, error) {
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(filepath.Join(path, ".git")); err != nil {
 		if create {
 			return CreateGitStorage(path)
 		} else {
