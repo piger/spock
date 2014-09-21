@@ -14,19 +14,21 @@ endif
 
 GO_RICE := $(GOPATH)/bin/rice
 GO_FILES := $(shell find . -name '*.go')
-SPOCK_CMD := cmd/spock/spock.go
+GO_PACKAGE := github.com/piger/spock
+BUILD_TAGS := "libstemmer icu leveldb"
 
-all: spock
+all: install
+
+install: $(GO_FILES) $(GO_RICE)
+	go install -tags $(BUILD_TAGS) $(GO_PACKAGE)/cmd/spock
+	$(GO_RICE) append --exec $(GOPATH)/bin/spock
 
 spock: $(GO_FILES) $(GO_RICE)
-	go build -tags "libstemmer icu leveldb" $(SPOCK_CMD)
+	go build -tags $(BUILD_TAGS) cmd/spock/spock.go
 	$(GO_RICE) append --exec spock
 
 $(GO_RICE):
 	go get github.com/GeertJohan/go.rice
 	go get github.com/GeertJohan/go.rice/rice
 
-static-data.tar.gz:
-	tar zcvf static-data.tar.gz data/
-
-.PHONY: static-data.tar.gz
+.PHONY: install
