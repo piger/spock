@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type GitStorage struct {
@@ -54,6 +55,14 @@ func (gs *GitStorage) MakeAbsPath(path string) string {
 	}
 
 	return filepath.Join(gs.WorkDir, path)
+}
+
+func (gs *GitStorage) JoinPath(relpath string) (string, error) {
+	res := filepath.Join(gs.WorkDir, relpath)
+	if !strings.HasPrefix(res, gs.WorkDir) {
+		return "", errors.New("Requested file outside repository directory")
+	}
+	return res, nil
 }
 
 // Returns the last (root) commit and tree objects.

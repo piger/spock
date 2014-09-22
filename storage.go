@@ -15,6 +15,8 @@ var PAGE_EXTENSIONS = []string{"md", "rst", "txt"}
 
 // This is the interface to the version control system used as a backend.
 type Storage interface {
+	JoinPath(relpath string) (string, error)
+
 	// Lookup a single Page
 	LookupPage(pagepath string) (*Page, bool, error)
 

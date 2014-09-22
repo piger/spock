@@ -240,13 +240,14 @@ func RunServer(address string, ac *AppContext) error {
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(IndexAllPages))).Queries("action", "index")
 	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
 	r.Handle("/search", WithRequest(ac, vHandlerFunc(SearchPages))).Name("search_pages")
+	r.Handle(`/{filename:.*?\.(png|jpe?g|bmp|gif|pdf)$}`, WithRequest(ac, vHandlerFunc(ServeFile))).Name("serve_file")
 
-	pp := "/{pagepath:[a-zA-Z0-9_/.-]+}"
+	pp := `/{pagepath:[a-zA-Z0-9_/.-]+}`
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(EditPage))).Queries("action", "edit").Name("edit_page")
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("action", "log").Name("show_log")
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("action", "rename").Name("rename_page")
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(DeletePage))).Queries("action", "delete").Name("delete_page")
-	r.Handle(pp, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("action", "diff", "startrev", "{startrev:[a-zA-Z0-9]{40}}", "endrev", "{endrev:[a-zA-Z0-9]{40}}").Name("diff_page")
+	r.Handle(pp, WithRequest(ac, vHandlerFunc(DiffPage))).Queries("action", "diff", "startrev", `{startrev:[a-zA-Z0-9]{40}}`, "endrev", `{endrev:[a-zA-Z0-9]{40}}`).Name("diff_page")
 
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(ShowPage))).Name("show_page")
 	http.Handle("/", r)

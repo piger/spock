@@ -80,6 +80,18 @@ func convertNewlines(text string) string {
 	return strings.Replace(text, "\r\n", "\n", -1)
 }
 
+func ServeFile(w http.ResponseWriter, r *vRequest) {
+	vars := mux.Vars(r.Request)
+	relfilename := vars["filename"]
+	filename, err := r.Ctx.Storage.JoinPath(relfilename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	http.ServeFile(w, r.Request, filename)
+}
+
 func ShowPage(w http.ResponseWriter, r *vRequest) {
 	ctx := newTemplateContext(r)
 
