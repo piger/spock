@@ -1,6 +1,8 @@
 # Spock wiki
 
-Spock is a simple wiki software heavily inspired by [GitHub's Gollum][Gollum] and is mostly intended as a personal documentation system. I wrote it as a frontend for my technical notes.
+Spock is a simple wiki software heavily inspired by
+[GitHub's Gollum][Gollum] and is mostly intended as a personal
+documentation system. I wrote it as a frontend for my technical notes.
 
 [Gollum]: https://github.com/gollum/gollum
 
@@ -17,9 +19,11 @@ Spock is a simple wiki software heavily inspired by [GitHub's Gollum][Gollum] an
 
 ## Features
 
-- wiki pages can be written in Markdown or RestructuredText and can be edited with your preferred text editor
+- wiki pages can be written in Markdown or RestructuredText and can be
+  edited with your preferred text editor
 - git is used as the underlying storage system
 - full text search (**beta**)
+- nice browser editor thanks to [CodeMirror](http://codemirror.net)
 
 **NOTE**: RestructuredText is **not** rendered by Go code, see below.
 
@@ -65,19 +69,10 @@ On OS X with [homebrew](http://brew.sh):
 brew install mercurial cmake icu4c pkg-config leveldb
 ```
 
-You will also need to download a copy of [CodeMirror][CodeMirror] and unpack it
-inside the `data/static/` directory, so that you end up having:
-
-```
-$ ls data/static/
-codemirror-4.5/  css/  favicon.ico  fonts/  js/
-```
-
-[CodeMirror]: http://codemirror.net/codemirror.zip
-
 ### Building Spock
 
-To build Spock you first need to build `git2go` linking to a specific version of [libgit2][libgit2]
+To build Spock you first need to build `git2go` linking to a specific
+version of [libgit2][libgit2]
 
 ```bash
 go get -d github.com/libgit2/git2go
@@ -92,7 +87,9 @@ Now you can build Spock by running `make`; if you system doesn't ship with an up
 version of `libleveldb` you can edit the `Makefile` and remove `leveldb` from the Go
 build tags.
 
-To render `RestructuredText` pages you will also need the `rst2html` program, included in [docutils][docutils] Python package; `rst2html` must be present in `$PATH`:
+To render `RestructuredText` pages you will also need the `rst2html`
+program, included in [docutils][docutils] Python package; `rst2html`
+must be present in `$PATH`:
 
 ```bash
 sudo pip install docutils
@@ -100,20 +97,11 @@ sudo pip install docutils
 sudo easy_install docutils
 ```
 
-### Packing a Linux distribution-independent archive
-
-To pack an archive containing a distribution-independent GNU/Linux version of Spock:
-
-```bash
-mkdir -p spock-linux-i386/lib/i386-linux-gnu
-for lib in `ldd spock | awk '$3 ~ /^\// { print $3 }'`; do cp $lib spock-linux-i386/lib/i386-linux-gnu/; done
-cp /lib/ld-linux.so.2 spock-linux-i386/lib/ld-linux-i386
-tar --xz -cvf spock-linux-i386.tar.xz spock-linux-i386
-```
-
 ## Author
 
 Daniel Kertesz <daniel@spatof.org>
+
+Spock includes a copy of [CodeMirror 4.5](http://codemirror.net/): https://github.com/marijnh/codemirror 
 
 [libgit2]: https://libgit2.github.com/
 
