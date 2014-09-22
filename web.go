@@ -234,15 +234,17 @@ func RunServer(address string, ac *AppContext) error {
 
 	http.Handle(staticPrefix, http.StripPrefix(staticPrefix, http.FileServer(rice.MustFindBox("data/static").HTTPBox())))
 
+	r.Handle("/", WithRequest(ac, vHandlerFunc(Login))).Queries("action", "login").Name("login")
+	r.Handle("/", WithRequest(ac, vHandlerFunc(Logout))).Queries("action", "logout").Name("logout")
+	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexAllPages))).Queries("action", "index")
+	r.Handle("/", WithRequest(ac, vHandlerFunc(ListPages))).Queries("action", "ls").Name("list_pages")
+	r.Handle("/", WithRequest(ac, vHandlerFunc(SearchPages))).Queries("action", "search").Name("search_pages")
 	r.Handle("/", WithRequest(ac, vHandlerFunc(IndexRedirect))).Name("index")
-	r.Handle("/login", WithRequest(ac, vHandlerFunc(Login))).Name("login")
-	r.Handle("/logout", WithRequest(ac, vHandlerFunc(Logout))).Name("logout")
-	r.Handle("/ls", WithRequest(ac, vHandlerFunc(IndexAllPages))).Queries("action", "index")
-	r.Handle("/ls", WithRequest(ac, vHandlerFunc(ListPages))).Name("list_pages")
-	r.Handle("/search", WithRequest(ac, vHandlerFunc(SearchPages))).Name("search_pages")
-	r.Handle(`/{filename:.*?\.(png|jpe?g|bmp|gif|pdf)$}`, WithRequest(ac, vHandlerFunc(ServeFile))).Name("serve_file")
 
-	pp := `/{pagepath:[a-zA-Z0-9_/.-]+}`
+	// serve any filename ending with an extension as a binary file.
+	r.Handle(`/{filename:.*?\.\w+$}`, WithRequest(ac, vHandlerFunc(ServeFile))).Name("serve_file")
+
+	pp := `/{pagepath:.*}`
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(EditPage))).Queries("action", "edit").Name("edit_page")
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(ShowPageLog))).Queries("action", "log").Name("show_log")
 	r.Handle(pp, WithRequest(ac, vHandlerFunc(RenamePage))).Queries("action", "rename").Name("rename_page")

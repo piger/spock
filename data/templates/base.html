@@ -34,10 +34,10 @@
 
         <div class="collapse navbar-collapse" id="navbar-menu">
           <ul class="nav navbar-nav">
-            <li><a href="{{reverse "list_pages"}}">All wiki pages</a></li>
+            <li><a href="{{reverse "list_pages"}}?action=ls">All wiki pages</a></li>
           </ul>
 
-          <form class="navbar-form navbar-left" role="search" method="post" action="{{reverse "search_pages"}}">
+          <form class="navbar-form navbar-left" role="search" method="post" action="{{reverse "search_pages"}}?action=search">
             <div class="form-group">
               <input type="text" name="q" class="form-control" placeholder="Insert query..." {{if .SearchQuery}}value="{{.SearchQuery}}"{{end}}>
             </div>
@@ -50,11 +50,11 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> {{.user.Name}} <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="{{reverse "logout"}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                <li><a href="{{reverse "logout"}}?action=logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
               </ul>
             </li>
             {{else}}
-            <li><a href="{{reverse "login"}}">Login</a></li>
+            <li><a href="{{reverse "login"}}?action=login">Login</a></li>
             {{end}}
           </ul>
 

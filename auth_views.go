@@ -62,5 +62,5 @@ func Logout(w http.ResponseWriter, r *vRequest) {
 	delete(r.Session.Values, "email")
 	r.Session.Save(r.Request, w)
 
-	http.Redirect(w, r.Request, "/login", http.StatusSeeOther)
+	http.Redirect(w, r.Request, "/?action=login", http.StatusSeeOther)
 }
