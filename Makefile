@@ -25,10 +25,17 @@ install: $(GO_FILES) $(GO_RICE)
 
 spock: $(GO_FILES) $(GO_RICE)
 	go build -tags $(BUILD_TAGS) cmd/spock/spock.go
+
+clean:
+	rm spock
+
+# Add "-w" to ldflags to skip debug informations.
+release: clean $(GO_RICE)
+	go build -ldflags "-w" -tags $(BUILD_TAGS) cmd/spock/spock.go
 	$(GO_RICE) append --exec spock
 
 $(GO_RICE):
 	go get github.com/GeertJohan/go.rice
 	go get github.com/GeertJohan/go.rice/rice
 
-.PHONY: install
+.PHONY: install clean release
