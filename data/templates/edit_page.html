@@ -45,20 +45,19 @@
 {{end}}
 
 {{define "extrahead"}}
-<link rel="stylesheet" href="/static/codemirror-4.5/lib/codemirror.css">
-<link rel="stylesheet" href="/static/codemirror-4.5/theme/base16-light.css">
-<link rel="stylesheet" href="/static/codemirror-4.5/theme/mdn-like.css">
+<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="/static/codemirror/theme/mdn-like.css">
 
-<script src="/static/codemirror-4.5/lib/codemirror.js"></script>
+<script src="/static/codemirror/lib/codemirror.js"></script>
 
 {{/* overlay is needed by rst mode! */}}
-<script src="/static/codemirror-4.5/addon/mode/overlay.js"></script>
-<script src="/static/codemirror-4.5/addon/mode/multiplex.js"></script>
-<script src="/static/codemirror-4.5/addon/selection/active-line.js"></script>
+<script src="/static/codemirror/addon/mode/overlay.js"></script>
+<script src="/static/codemirror/addon/mode/multiplex.js"></script>
+<script src="/static/codemirror/addon/selection/active-line.js"></script>
 
-<script src="/static/codemirror-4.5/mode/rst/rst.js"></script>
-<script src="/static/codemirror-4.5/mode/yaml/yaml.js"></script>
-<script src="/static/codemirror-4.5/mode/markdown/markdown.js"></script>
+<script src="/static/codemirror/mode/rst/rst.js"></script>
+<script src="/static/codemirror/mode/yaml/yaml.js"></script>
+<script src="/static/codemirror/mode/markdown/markdown.js"></script>
 {{end}}
 
 {{define "js"}}

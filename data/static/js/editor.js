@@ -24,6 +24,6 @@ var editor = CodeMirror.fromTextArea(document.getElementById("content-area"), {
 $(document).ready(function() {
     $("#cancel-btn").on('click', function () {
         var u = window.location.href;
-        window.location.href = u.replace("?edit=1", "");
+        window.location.href = u.replace("?action=edit", "");
     });
 });
