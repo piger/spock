@@ -71,3 +71,12 @@
 .highlight {
   color: red;
 }
+
+.new-page {
+  color: #C91637;
+  font-weight: bold;
+}
+
+.new-page:hover {
+  color: #8F2430;
+}

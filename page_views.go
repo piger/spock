@@ -12,6 +12,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"path"
 	"runtime"
 	"strings"
 	"time"
@@ -111,6 +112,17 @@ func ShowPage(w http.ResponseWriter, r *vRequest) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	pageBasePath := path.Dir(r.Request.URL.Path)
+	pageList, err := r.Ctx.Storage.ListPages()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	html, err = AddCSSClasses(pageList, pageBasePath, html)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	ctx["breadcrumbs"] = updateBreadcrumbs(w, r, page)
