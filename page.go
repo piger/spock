@@ -36,6 +36,8 @@ My first paragraph.
 const (
 	markdownName = "markdown"
 	rstName      = "rst"
+
+	DefaultExtension = "md"
 )
 
 var (
@@ -182,7 +184,7 @@ func (page *Page) GetMarkup() (markup string) {
 		case ".rst":
 			markup = rstName
 		default:
-			markup = ext[1:]
+			markup = markdownName // XXX default
 		}
 	}
 	return
