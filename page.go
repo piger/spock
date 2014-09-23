@@ -150,7 +150,7 @@ func LoadPage(path, relpath string) (*Page, error) {
 func (page *Page) SetRawBytes(content []byte) (err error) {
 	page.RawBytes = content
 	page.Header, page.Content, err = ParsePageBytes(page.RawBytes)
-	if err != nil {
+	if err == nil {
 		page.Mtime = time.Now()
 	}
 	return err
