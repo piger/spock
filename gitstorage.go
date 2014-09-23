@@ -262,40 +262,36 @@ func (gs *GitStorage) LogsForPage(path string) (result []CommitLog, err error) {
 	return
 }
 
-func (gs *GitStorage) LookupPage(pagepath string) (*Page, bool, error) {
-	absbasepath := filepath.Join(gs.WorkDir, pagepath)
-	if absbasepath[0:len(gs.WorkDir)] != gs.WorkDir {
-		return nil, false, errors.New("Page path outside of repository directory: " + absbasepath)
-	}
-
-	var found bool
-	if len(filepath.Ext(pagepath)) > 0 {
-		if _, err := os.Stat(absbasepath); err == nil {
-			found = true
-		}
-	} else {
-		for _, ext := range PAGE_EXTENSIONS {
-			if _, err := os.Stat(absbasepath + "." + ext); err == nil {
-				found = true
-				absbasepath = absbasepath + "." + ext
-				pagepath = pagepath + "." + ext
-				break
-			}
-		}
-	}
-
-	if !found {
-		// append the default extension
-		emptyPage := NewPage(pagepath + ".md")
-		return emptyPage, false, nil
-	}
-
-	page, err := LoadPage(absbasepath, pagepath)
+// LookupPage is used to fetch pages from the wiki storage. The "relpath"
+// argument refers to a page path relative to the root of the wiki; for
+// example "notes/Linux" and "/notes/Linux" both refers to the "Linux"
+// page found inside the "/notes" wiki directory. Remember that wiki
+// pages are qualified by their "wiki filename", that is the page filename
+// without the extension.
+//
+// Paths are checked for directory traversal attacks and an error will be
+// returned if the "relpath" argument refers to a file outside the wiki
+// repository.
+func (gs *GitStorage) LookupPage(relpath string) (*Page, bool, error) {
+	abspath, err := gs.JoinPath(relpath)
 	if err != nil {
-		return nil, found, err
+		return nil, false, err
 	}
 
-	return page, found, nil
+	for i := range PAGE_EXTENSIONS {
+		filename := abspath + "." + PAGE_EXTENSIONS[i]
+		relfilename := relpath + "." + PAGE_EXTENSIONS[i]
+		if _, err := os.Stat(filename); err == nil {
+			page, err := LoadPage(filename, relfilename)
+			if err != nil {
+				return nil, true, err
+			}
+			return page, true, nil
+		}
+	}
+	filename := relpath + "." + DefaultExtension
+	page := NewPage(filename)
+	return page, false, nil
 }
 
 type OidSet struct {
