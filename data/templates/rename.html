@@ -23,7 +23,7 @@
 
       <div class="form-group">
         <button type="submit" id="save-btn" name="save" class="btn btn-primary">Save</button>
-        <button type="button" id="cancel-btn" class="btn btn-default">Cancel</button>
+        <a class="btn btn-default" id="cancel-btn" href="{{reverse "show_page" "pagepath" .pageName}}">Cancel</a>
       </div>
     </form>
   </div>
