@@ -117,8 +117,14 @@ func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
 	return ph, content, nil
 }
 
-// LoadPage loads a page from the filesystem.
+// LoadPage loads a page from the filesystem; the "path" argument must be an
+// absolute filename, and the "relpath" must be relative "wiki path" plus
+// the file extension; example arguments:
+// "/var/spock/repository/notes/Linux.md" and "notes/Linux.md".
 func LoadPage(path, relpath string) (*Page, error) {
+	if !filepath.IsAbs(path) {
+		return nil, fmt.Errorf("page path %s is not an absolute path", path)
+	}
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
