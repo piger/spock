@@ -119,11 +119,11 @@ func ParsePageBytes(data []byte) (*PageHeader, []byte, error) {
 
 // LoadPage loads a page from the filesystem.
 func LoadPage(path, relpath string) (*Page, error) {
-	fi, err := os.Stat(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	file, err := os.Open(path)
+	fi, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
@@ -133,13 +133,10 @@ func LoadPage(path, relpath string) (*Page, error) {
 	}
 
 	page := NewPage(relpath)
-	page.RawBytes = data
-	page.Mtime = fi.ModTime()
-
-	page.Header, page.Content, err = ParsePageBytes(data)
-	if err != nil {
+	if err := page.SetRawBytes(data); err != nil {
 		return nil, err
 	}
+	page.Mtime = fi.ModTime()
 
 	return page, nil
 }
