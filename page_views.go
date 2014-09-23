@@ -156,6 +156,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 
 	ctx := newTemplateContext(r)
 	preview := false
+	var comment string
 
 	if r.Request.Method == "POST" {
 		if err := r.Request.ParseForm(); err != nil {
@@ -170,9 +171,10 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 		}
 
 		content := convertNewlines(r.Request.PostFormValue("content"))
-		comment := convertNewlines(r.Request.PostFormValue("comment"))
+		comment = convertNewlines(r.Request.PostFormValue("comment"))
 		doPreview := r.Request.PostFormValue("preview")
 
+		// showing preview
 		if doPreview != "" {
 			preview = true
 
@@ -190,7 +192,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 			ctx["preview"] = template.HTML(html)
 			ctx["content"] = template.HTML(content)
 		} else {
-
+			// not showing preview
 			if comment == "" {
 				comment = "(no comment)"
 			}
@@ -236,7 +238,7 @@ func EditPage(w http.ResponseWriter, r *vRequest) {
 	}
 	ctx["pageName"] = page.ShortName()
 	ctx["isNew"] = false
-	ctx["comment"] = ""
+	ctx["comment"] = comment
 	ctx["_xsrf"] = xsrftoken.Generate(r.Ctx.XsrfSecret, r.AuthUser.Name, "post")
 	ctx["breadcrumbs"] = getBreadcrumbs(r)
 
