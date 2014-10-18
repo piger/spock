@@ -56,6 +56,9 @@ Requirements:
 - leveldb (optional)
 - Python [docutils][docutils] (optional, used for `rst` rendering)
 
+Note: you cannot use the `libgit2` package provided by your package manager because
+`git2go` needs a specific version of the library.
+
 On a Debian based GNU/Linux system you should be able to install all the
 required dependencies running:
 
