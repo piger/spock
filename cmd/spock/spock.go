@@ -57,7 +57,9 @@ func main() {
 
 	// If we are opening an existing repository and the index is empty we
 	// run an initial indexing of the whole repository content.
-	if (index.DocCount() == 0 && !*initRepo) || *reIndex {
+	if count, err := index.DocCount(); err != nil {
+		log.Printf("Error counting documents: %s\n", err)
+	} else if (count == 0 && !*initRepo) || *reIndex {
 		go func() {
 			log.Printf("New index: Indexing all pages\n")
 			err = index.IndexWiki(storage)

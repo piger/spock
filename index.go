@@ -101,7 +101,7 @@ func (idx *Index) Close() {
 	idx.index.Close()
 }
 
-func (idx *Index) DocCount() uint64 {
+func (idx *Index) DocCount() (uint64, error) {
 	return idx.index.DocCount()
 }
 
