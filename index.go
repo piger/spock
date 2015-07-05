@@ -114,7 +114,7 @@ func (idx *Index) IndexWiki(storage Storage) error {
 		return nil
 	}
 
-	batch := bleve.NewBatch()
+	batch := idx.index.NewBatch()
 	for _, pagePath := range pages {
 		page, _, err := storage.LookupPage(pagePath)
 		if err != nil {
