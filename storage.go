@@ -11,7 +11,7 @@ import (
 )
 
 // Valid page extensions.
-var PAGE_EXTENSIONS = []string{"md", "rst", "txt"}
+var PAGE_EXTENSIONS = []string{"md", "rst", "org", "txt"}
 
 // This is the interface to the version control system used as a backend.
 type Storage interface {

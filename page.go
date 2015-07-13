@@ -19,9 +19,6 @@ import (
 	"time"
 )
 
-// rst2html program path
-var rst2htmlPath string
-
 // NewPageContent is the initial content of a new Wiki page.
 var NewPageContent = `---
 title: "My page"
@@ -36,21 +33,34 @@ My first paragraph.
 const (
 	markdownName = "markdown"
 	rstName      = "rst"
+	orgName      = "org"
 
 	DefaultExtension = "md"
+)
+
+const (
+	PANDOC_IN_ORG uint8 = iota + 1
+	PANDOC_IN_RST
+
+	PANDOC_OUT_HTML
+	PANDOC_OUT_TXT
 )
 
 var (
 	htmlBodyStart = []byte("<body>")
 	htmlBodyEnd   = []byte("</body>")
 	headerTag     = []byte("---")
+
+	pandocEnabled bool = false
+	pandocExe          = ""
 )
 
 func init() {
 	var err error
-	if rst2htmlPath, err = lookupRst(); err != nil {
-		log.Printf("RestructuredText rendering disabled: %s\n", err)
-		rst2htmlPath = "/bin/cat"
+	if pandocExe, err = exec.LookPath("pandoc"); err == nil {
+		pandocEnabled = true
+	} else {
+		log.Printf("Cannot find pandoc, disabling extra renderers\n")
 	}
 }
 
@@ -186,6 +196,8 @@ func (page *Page) GetMarkup() (markup string) {
 			markup = markdownName
 		case ".rst":
 			markup = rstName
+		case ".org":
+			markup = orgName
 		default:
 			markup = markdownName // XXX default
 		}
@@ -201,6 +213,8 @@ func (page *Page) Render() (html []byte, err error) {
 		html, err = renderMarkdown(page.Content)
 	case rstName:
 		html, err = renderRst(page.Content)
+	case orgName:
+		html, err = renderOrg(page.Content)
 	default:
 		html, err = []byte(page.Content), fmt.Errorf("Unknown format: %s", markup)
 	}
@@ -213,6 +227,10 @@ func (page *Page) RenderPlaintext() (txt []byte, err error) {
 		extensions := 0
 		renderer := blackfridaytext.TextRenderer()
 		txt, err = blackfriday.Markdown(page.Content, renderer, extensions), nil
+	case rstName:
+		txt, err = renderRstPlain(page.Content)
+	case orgName:
+		txt, err = renderOrgPlain(page.Content)
 	default:
 		// we won't return an error because text rendering is "best effort" :)
 		txt, err = page.RawBytes, nil
@@ -227,6 +245,8 @@ func (page *Page) RenderPreview(content []byte) (html []byte, err error) {
 		html, err = renderMarkdown(content)
 	case rstName:
 		html, err = renderRst(content)
+	case orgName:
+		html, err = renderOrg(content)
 	default:
 		html, err = []byte(content), fmt.Errorf("Unknown format: %s", markup)
 	}
@@ -252,46 +272,64 @@ func renderMarkdown(content []byte) ([]byte, error) {
 	return blackfriday.Markdown(content, renderer, extensions), nil
 }
 
-// Lookup the correct 'rst2html' program inspecting $PATH
-func lookupRst() (string, error) {
-	var names = []string{"rst2html", "rst2html.py"}
-
-	for _, name := range names {
-		if rstbin, err := exec.LookPath(name); err == nil {
-			return rstbin, nil
-		}
+func renderPandoc(content []byte, srcType uint8, dstType uint8, extraArgs ...string) ([]byte, error) {
+	if !pandocEnabled {
+		return nil, errors.New("pandoc executable was not found in PATH")
 	}
 
-	return "", errors.New("rst2html program not found")
-}
+	var inType string = ""
+	switch {
+	case srcType == PANDOC_IN_ORG:
+		inType = "org"
+	case srcType == PANDOC_IN_RST:
+		inType = "rst"
+	}
+	if inType == "" {
+		return nil, fmt.Errorf("Unknown input type: %d", srcType)
+	}
 
-func renderRst(content []byte) ([]byte, error) {
-	cmd := exec.Command(rst2htmlPath)
+	var outType string = ""
+	switch {
+	case dstType == PANDOC_OUT_HTML:
+		outType = "html"
+	case dstType == PANDOC_OUT_TXT:
+		outType = "plain"
+	}
+	if outType == "" {
+		return nil, fmt.Errorf("Unknown output type: %d", dstType)
+	}
+
+	cmdline := []string{"-f", inType, "-t", outType}
+	cmdline = append(cmdline, extraArgs...)
+	cmd := exec.Command(pandocExe, cmdline...)
 	cmd.Stdin = bytes.NewReader(content)
 	var out, errout bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &errout
 
 	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("Error executing RST renderer: %s\n", err.Error())
+		return nil, fmt.Errorf("Error executing pandoc renderer: %s", err.Error())
 	}
-
 	errStr := errout.String()
 	if len(errStr) > 0 {
-		log.Printf("WARNING: stderr from RST: %s\n", errStr)
+		log.Printf("WARNING: stderr from pandoc: %s\n", errStr)
 	}
 
-	// extract HTML between <body> and </body> tags
-	html := out.Bytes()
-	bs := bytes.Index(html, htmlBodyStart)
-	if bs == -1 {
-		return nil, fmt.Errorf("Error rendering rst: cannot find <body> tag")
-	}
-	be := bytes.LastIndex(html, htmlBodyEnd)
-	if be == -1 {
-		return nil, fmt.Errorf("Error rendering rst: cannot find </body> tag")
-	}
+	return out.Bytes(), nil
+}
 
-	html = html[bs+len(htmlBodyStart) : be]
-	return html, nil
+func renderRst(content []byte) ([]byte, error) {
+	return renderPandoc(content, PANDOC_IN_RST, PANDOC_OUT_HTML)
+}
+
+func renderOrg(content []byte) ([]byte, error) {
+	return renderPandoc(content, PANDOC_IN_ORG, PANDOC_OUT_HTML)
+}
+
+func renderRstPlain(content []byte) ([]byte, error) {
+	return renderPandoc(content, PANDOC_IN_RST, PANDOC_OUT_TXT)
+}
+
+func renderOrgPlain(content []byte) ([]byte, error) {
+	return renderPandoc(content, PANDOC_IN_ORG, PANDOC_OUT_TXT)
 }
