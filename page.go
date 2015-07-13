@@ -271,11 +271,14 @@ func renderRst(content []byte) ([]byte, error) {
 	var out, errout bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &errout
-	err := cmd.Run()
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("Error executing RST renderer: %s\n", err.Error())
+	}
 
 	errStr := errout.String()
 	if len(errStr) > 0 {
-		fmt.Print(errStr)
+		log.Printf("WARNING: stderr from RST: %s\n", errStr)
 	}
 
 	// extract HTML between <body> and </body> tags
@@ -290,5 +293,5 @@ func renderRst(content []byte) ([]byte, error) {
 	}
 
 	html = html[bs+len(htmlBodyStart) : be]
-	return html, err
+	return html, nil
 }
