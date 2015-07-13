@@ -278,12 +278,13 @@ func renderRst(content []byte) ([]byte, error) {
 		fmt.Print(errStr)
 	}
 
+	// extract HTML between <body> and </body> tags
 	html := out.Bytes()
 	bs := bytes.Index(html, htmlBodyStart)
 	if bs == -1 {
 		return nil, fmt.Errorf("Error rendering rst: cannot find <body> tag")
 	}
-	be := bytes.Index(html, htmlBodyEnd)
+	be := bytes.LastIndex(html, htmlBodyEnd)
 	if be == -1 {
 		return nil, fmt.Errorf("Error rendering rst: cannot find </body> tag")
 	}
