@@ -15,11 +15,10 @@ export GOPATH=$(CURDIR)/go_build
 %:
 	dh $@
 
-# git2go has his own funky build method
+# here we used to compile libgit2 when it was bundled with git2go, which is not
+# required anymore. do we still need to 'go get' stuff?
 override_dh_auto_configure:
 	go get -d -tags "libstemmer icu leveldb" $(GO_PACKAGE)
-	cd $(GOPATH)/src/github.com/libgit2/git2go && git submodule update --init
-	$(MAKE) -C $(GOPATH)/src/github.com/libgit2/git2go install
 
 override_dh_auto_test:
 	cd $(GOPATH)/src/$(GO_PACKAGE) && go test ./...
