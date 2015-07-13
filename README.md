@@ -43,7 +43,11 @@ Typical usage:
 
 ## Installing Spock from sources
 
-Requirements:
+Runtime requirements:
+
+- [pandoc](http://pandoc.org/) optional, enable rendering of rst and org documents
+
+Build requirements:
 
 - recent version of Go (tested with Go 1.3+)
 - a C compiler
@@ -52,13 +56,12 @@ Requirements:
 - libgit 0.22.x
 - icu4c
 - leveldb (optional)
-- Python [docutils][docutils] (optional, used for `rst` rendering)
 
 On a Debian based GNU/Linux system you should be able to install
 almost all the required dependencies running:
 
 ```bash
-sudo apt-get install python-docutils cmake git mercurial libicu-dev libleveldb-dev
+sudo apt-get install pandoc cmake git mercurial libicu-dev libleveldb-dev
 ```
 
 You must build libgit2 0.22.x by yourself.
@@ -75,16 +78,6 @@ You can build Spock by running `make`; if you system doesn't ship with
 an updated version of `libleveldb` you can edit the `Makefile` and
 remove `leveldb` from the Go build tags.
 
-To render `RestructuredText` pages you will also need the `rst2html`
-program, included in [docutils][docutils] Python package; `rst2html`
-must be present in `$PATH`:
-
-```bash
-sudo pip install docutils
-# or
-sudo easy_install docutils
-```
-
 ## Author
 
 Daniel Kertesz <daniel@spatof.org>
@@ -94,5 +87,3 @@ Spock includes a copy of [CodeMirror 4.5](http://codemirror.net/): https://githu
 [libgit2]: https://libgit2.github.com/
 
 [git2go]: https://github.com/libgit2/git2go
-
-[docutils]: http://docutils.sourceforge.net/
