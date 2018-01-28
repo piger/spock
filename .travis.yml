@@ -7,11 +7,13 @@ go:
 - 1.9
 before_install:
 - git clone https://github.com/libgit2/libgit2
-- cd libgit2 && git checkout v0.23.4 && mkdir -p install/lib build && cd build && cmake -DTHREADSAFE=ON -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="RelWithDebInfo" -DCMAKE_INSTALL_PREFIX=../install .. && cmake --build .
+- (cd libgit2 && git checkout v0.23.4 && mkdir -p install/lib build && cd build && cmake -DTHREADSAFE=ON -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="RelWithDebInfo" -DCMAKE_INSTALL_PREFIX=../install .. && cmake --build . && make install)
 install:
 - go get github.com/kardianos/govendor
 - govendor sync
 script:
+- export CGO_LDFLAGS="-L libgit2/install/lib"
+- export CGO_CFLAGS="-I libgit2/install/include"
 - make spock
 before_deploy:
 - GOOS=linux GOARCH=amd64 govendor build -o spock_linux_amd64 ./cmd/spock
