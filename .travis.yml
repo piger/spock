@@ -1,0 +1,33 @@
+addons:
+  apt:
+    packages:
+    - cmake
+language: go
+go:
+- 1.9
+before_install:
+- git clone https://github.com/libgit2/libgit2
+- cd libgit2 && git checkout v0.23.4 && mkdir -p install/lib build && cd build && cmake -DTHREADSAFE=ON -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="RelWithDebInfo" -DCMAKE_INSTALL_PREFIX=../install .. && cmake --build .
+install:
+- go get github.com/kardianos/govendor
+- govendor sync
+script:
+- make spock
+before_deploy:
+- GOOS=linux GOARCH=amd64 govendor build -o spock_linux_amd64 ./cmd/spock
+- GOOS=linux GOARCH=386 govendor build -o spock_linux_x86 ./cmd/spock
+- GOOS=linux GOARCH=arm govendor build -o spock_linux_arm ./cmd/spock
+- GOOS=darwin GOARCH=amd64 govendor build -o spock_darwin_amd64 ./cmd/spock
+deploy:
+  provider: releases
+  api_key:
+    secure: irWRiLTei3TWwe8IhT9rfsbkA+gEEbOJ4ZOkr8dsCWSmGMMSjHru+BVsivydCLuEi+4A7nzxNwDk9s556i5mf4ups8OW3ZX19V1xSdtshbNZJ/4KMV8LZ8CHTKQQWWUrc62miE9aeXAf1FWP3mbMrz8wPeUqVw5KmrzzmYhiJWc=
+  file:
+    - spock_linux_amd64
+    - spock_linux_x86
+    - spock_linux_arm
+    - spock_darwin_amd64
+  skip_cleanup: true
+  on:
+    repo: piger/spock
+    tags: true
