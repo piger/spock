@@ -7,7 +7,7 @@ package spock
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/libgit2/git2go.v22"
+	"gopkg.in/libgit2/git2go.v23"
 	"io/ioutil"
 	"log"
 	"os"
@@ -85,7 +85,7 @@ func (gs *GitStorage) currentState() (commit *git.Commit, tree *git.Tree, err er
 // initial commit).
 func (gs *GitStorage) hasRootCommit() bool {
 	refname := "refs/heads/master"
-	_, err := gs.r.LookupReference(refname)
+	_, err := gs.r.References.Lookup(refname)
 	if err != nil {
 		return false
 	}

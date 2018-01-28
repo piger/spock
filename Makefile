@@ -14,22 +14,25 @@ BUILD_TAGS := "libstemmer icu leveldb"
 all: spock
 
 install: $(GO_FILES) $(GO_RICE)
-	go install -tags $(BUILD_TAGS) $(GO_PACKAGE)/cmd/spock
+	govendor install -tags $(BUILD_TAGS) ./cmd/spock
 	$(GO_RICE) append --exec $(GOPATH)/bin/spock
 
 spock: $(GO_FILES) $(GO_RICE)
-	go build -tags $(BUILD_TAGS) cmd/spock/spock.go
+	govendor build -tags $(BUILD_TAGS) cmd/spock/spock.go
 
 clean:
 	test -f spock && rm spock
 
+test:
+	govendor test
+
 # Add "-w" to ldflags to skip debug informations.
 release: clean $(GO_RICE)
-	go build -ldflags "-w" -tags $(BUILD_TAGS) cmd/spock/spock.go
+	govendor build -ldflags "-w" -tags $(BUILD_TAGS) ./cmd/spock
 	$(GO_RICE) append --exec spock
 
 $(GO_RICE):
 	go get github.com/GeertJohan/go.rice
 	go get github.com/GeertJohan/go.rice/rice
 
-.PHONY: install clean release
+.PHONY: install clean release test

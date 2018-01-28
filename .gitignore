@@ -6,3 +6,4 @@ env/
 *.egg-info/
 *.bleve
 data/static/codemirror-4.5/
+/vendor/*/

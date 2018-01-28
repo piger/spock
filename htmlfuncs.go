@@ -6,9 +6,9 @@ package spock
 
 import (
 	"bytes"
-	"code.google.com/p/go-html-transform/h5"
-	"code.google.com/p/go-html-transform/html/transform"
-	"code.google.com/p/go.net/html"
+	"go.marzhillstudios.com/pkg/go-html-transform/h5"
+	"go.marzhillstudios.com/pkg/go-html-transform/html/transform"
+	"golang.org/x/net/html"
 	"path"
 	"strings"
 )

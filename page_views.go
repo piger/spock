@@ -5,10 +5,10 @@
 package spock
 
 import (
-	"code.google.com/p/xsrftoken"
 	"encoding/gob"
 	"fmt"
 	"github.com/gorilla/mux"
+	"golang.org/x/net/xsrftoken"
 	"html/template"
 	"log"
 	"net/http"

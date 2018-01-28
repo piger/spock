@@ -52,8 +52,9 @@ Build requirements:
 - recent version of Go (tested with Go 1.3+)
 - a C compiler
 - git (to fetch some go dependencies)
+- [govendor](https://github.com/kardianos/govendor)
 - mercurial (to fetch some go dependencies)
-- libgit 0.22.x
+- libgit 0.23.x
 - icu4c
 - leveldb (optional)
 
