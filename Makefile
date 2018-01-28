@@ -21,7 +21,7 @@ spock: $(GO_FILES) $(GO_RICE)
 	govendor build -tags $(BUILD_TAGS) cmd/spock/spock.go
 
 clean:
-	test -f spock && rm spock
+	rm -f spock
 
 test:
 	govendor test

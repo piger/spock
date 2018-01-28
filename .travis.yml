@@ -2,6 +2,9 @@ addons:
   apt:
     packages:
     - cmake
+    - libstemmer-dev
+    - libicu-dev
+    - libleveldb-dev
 language: go
 go:
 - 1.9
