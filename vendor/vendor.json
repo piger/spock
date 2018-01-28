@@ -15,6 +15,18 @@
 			"revisionTime": "2017-04-20T13:57:05Z"
 		},
 		{
+			"checksumSHA1": "2F0VjyfWgSR+eHPRNoMeBQKLgSU=",
+			"path": "github.com/blevesearch/bleve",
+			"revision": "0fc9b4b74a65bc6e87e063ce716a1bc123a5ed38",
+			"revisionTime": "2018-01-23T17:09:23Z"
+		},
+		{
+			"checksumSHA1": "KplC1kdjyDvsG1XpLa9usXdI0Lo=",
+			"path": "github.com/blevesearch/bleve/document",
+			"revision": "0fc9b4b74a65bc6e87e063ce716a1bc123a5ed38",
+			"revisionTime": "2018-01-23T17:09:23Z"
+		},
+		{
 			"checksumSHA1": "8i+beEgcVf0q/I7lTqo2ERZM/OU=",
 			"path": "github.com/daaku/go.zipexe",
 			"revision": "a5fe2436ffcb3236e175e5149162b41cd28bd27d",
@@ -25,6 +37,12 @@
 			"path": "github.com/gorilla/context",
 			"revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
 			"revisionTime": "2016-08-17T18:46:32Z"
+		},
+		{
+			"checksumSHA1": "gzYAE/UJ+G7yTqkdJAMActxDdxw=",
+			"path": "github.com/gorilla/mux",
+			"revision": "c0091a029979286890368b4c7b301261e448e242",
+			"revisionTime": "2018-01-20T07:58:19Z"
 		},
 		{
 			"checksumSHA1": "ucTBCc7dDRKLGPsYfAzu/Gq63qA=",
